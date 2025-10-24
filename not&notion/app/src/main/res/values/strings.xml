@@ -3,4 +3,8 @@
     <string name="logo_app">logo_app</string>
     <string name="btnPerfil">btnPerfil\n</string>
     <string name="icono_folder">icono_folder</string>
+    <string name="new_user">Registrarse</string>
+    <string name="contraseña">Contraseña</string>
+    <string name="log_in">Iniciar Sesion</string>
+    <string name="usuario">Usuario</string>
 </resources>
