@@ -6,6 +6,10 @@
         <item name="android:windowBackground">@color/bg</item>
         <item name="android:textColor">@color/black</item>
 
+        <!--Color para los botones-->
+        <item name="colorPrimary">@color/light_brown</item>
+        <item name="colorOnPrimary">@color/black</item>
+
 
     </style>
 

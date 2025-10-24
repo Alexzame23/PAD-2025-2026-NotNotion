@@ -34,7 +34,7 @@ android:padding="32dp">
     android:layout_height="40dp"
     android:background="?attr/selectableItemBackgroundBorderless"
     android:src="@drawable/lng"
-    app:layout_constraintStart_toEndOf="@id/user"
+    app:layout_constraintEnd_toEndOf="@id/email"
     app:layout_constraintTop_toTopOf="@id/user"
     app:layout_constraintBottom_toBottomOf="@id/user"
     android:layout_marginStart="8dp"/>
@@ -88,17 +88,27 @@ android:padding="32dp">
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="@string/new_user"
-    app:layout_constraintTop_toBottomOf="@id/log_in"
+    app:layout_constraintTop_toBottomOf="@id/or"
     android:layout_marginTop="16dp"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent"/>
 
+    <TextView
+        android:id="@+id/or"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/or"
+        app:layout_constraintTop_toBottomOf="@id/log_in"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 <!-- Cadena vertical para centrar todo -->
-<androidx.constraintlayout.widget.Guideline
-    android:id="@+id/guideline_center"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    app:layout_constraintGuide_begin="366dp" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.500684" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
