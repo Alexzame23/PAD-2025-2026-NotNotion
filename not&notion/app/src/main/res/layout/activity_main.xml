@@ -25,8 +25,6 @@
         android:layout_height="50dp"
         android:layout_marginTop="36dp"
         android:layout_marginEnd="32dp"
-        android:background="@android:color/transparent"
-        android:backgroundTint="@color/bg"
         android:contentDescription="@string/btnPerfil"
         android:src="@drawable/ic_user"
         android:backgroundTintMode="screen"
@@ -39,7 +37,7 @@
         android:layout_width="0dp"
         android:layout_height="45dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
         android:background="@color/cream"
         android:drawablePadding="8dp"
@@ -47,22 +45,73 @@
         android:inputType="text"
         android:paddingStart="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/logoImage" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerItems"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
+        android:layout_width="356dp"
+        android:layout_height="390dp"
         android:layout_margin="32dp"
+        android:clipToPadding="false"
         android:padding="8dp"
         android:scrollbars="vertical"
-        app:layout_constraintTop_toBottomOf="@id/busquedaBarra"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.581"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/busquedaBarra"
+        app:layout_constraintVertical_bias="0.153"
         tools:listitem="@layout/item_explorer" />
+
+    <ImageButton
+        android:id="@+id/returnButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/cream"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/calendarButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerItems"
+        app:srcCompat="@drawable/ic_return" />
+
+    <ImageButton
+        android:id="@+id/calendarButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/desc_calendar_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/addButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/returnButton"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerItems"
+        app:srcCompat="@drawable/ic_calendar" />
+
+    <ImageButton
+        android:id="@+id/addButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/cream"
+        android:contentDescription="@string/desc_add_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/calendarButton"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerItems"
+        app:srcCompat="@drawable/ic_plus" />
+
+    <TextView
+        android:id="@+id/routeTextShow"
+        android:layout_width="301dp"
+        android:layout_height="24dp"
+        android:background="@color/light_brown"
+        android:text="Home -> PAD"
+        android:contentDescription="@string/desc_return_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/busquedaBarra" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
