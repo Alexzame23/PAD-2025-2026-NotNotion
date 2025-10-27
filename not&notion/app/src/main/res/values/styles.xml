@@ -23,7 +23,7 @@
         <item name="cornerSize">16dp</item>
     </style>
 
-    <!-- Estilo para TextInputLayout si lo quieres global -->
+    <!-- Estilo para TextInputLayout -->
     <style name="MyTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
         <item name="boxBackgroundColor">@color/light_yellow_transparent</item>
         <item name="boxCornerRadiusTopStart">12dp</item>

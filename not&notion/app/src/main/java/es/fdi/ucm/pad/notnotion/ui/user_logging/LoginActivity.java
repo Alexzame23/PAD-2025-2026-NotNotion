@@ -1,4 +1,5 @@
 package es.fdi.ucm.pad.notnotion.ui.user_logging;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -21,7 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import es.fdi.ucm.pad.notnotion.R;
-import es.fdi.ucm.pad.notnotion.ui.main.MainActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -36,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
                     this::onSignInResult
             );
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +107,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToMainActivity() {
-        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 }

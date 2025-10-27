@@ -50,10 +50,10 @@ public class MainActivity extends AppCompatActivity {
         });
         /*
         Esto para hacer que el recyclerView muestre los items de 3 en 3
-        */
+
         recyclerView = findViewById(R.id.recyclerItems);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-
+        */
 
         //Boton inicio sesión
         ImageButton btnPerfil = findViewById(R.id.btnPerfil);
