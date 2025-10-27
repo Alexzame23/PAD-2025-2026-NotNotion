@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import es.fdi.ucm.pad.notnotion.R;
+import es.fdi.ucm.pad.notnotion.ui.main.MainActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -107,6 +108,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToMainActivity() {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
         finish();
     }
 }
