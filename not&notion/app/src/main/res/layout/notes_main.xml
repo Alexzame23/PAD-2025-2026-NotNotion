@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg">
+
+    <!-- Barra de búsqueda -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/busquedaLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        app:boxBackgroundMode="filled"
+        app:boxBackgroundColor="@color/light_yellow_transparent"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/busquedaBarra"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:hint="@string/buscar"
+            android:inputType="text"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/black"
+            android:hintTextColor="@color/gray"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Texto de ruta debajo de la barra de búsqueda -->
+    <TextView
+        android:id="@+id/routeTextShow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/light_brown"
+        android:text="@string/route"
+        android:contentDescription="@string/desc_return_button"
+        android:padding="8dp"
+        android:textColor="@color/black"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/busquedaLayout"
+        app:layout_constraintStart_toStartOf="@id/busquedaLayout"
+        app:layout_constraintEnd_toEndOf="@id/busquedaLayout"
+        android:layout_marginTop="8dp"/>
+
+    <!-- RecyclerView para notas/carpetas -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerItems"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:layout_margin="16dp"
+        android:padding="8dp"
+        android:scrollbars="vertical"
+        app:layout_constraintTop_toBottomOf="@id/routeTextShow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:listitem="@layout/item_explorer"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

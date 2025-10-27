@@ -3,7 +3,11 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="cream">#FFF6E9</color>
-    <color name="brown">#8B5A2B</color>
-    <color name="light_brown">#DDBA99</color>
-    <color name="bg">#FFFEFD</color>
+    <color name="brown">#ff8B5A2B</color>
+    <color name="light_brown">#ffDDBA99</color>
+    <color name="light_yellow">#FFfdd87c</color>
+    <color name="bg">#FFf2edea</color>
+    <color name="light_yellow_transparent">#80fdd87c</color>
+    <color name="text_button">#ff4e2917</color>
+    <color name="transparent">#00000000</color>
 </resources>

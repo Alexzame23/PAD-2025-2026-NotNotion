@@ -1,25 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="8dp"
-    android:background="@color/bg">
+    android:padding="8dp">
 
+    <!-- Icono dinámico (nota o carpeta) -->
     <ImageView
-        android:id="@+id/iconoItem"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:src="@drawable/folder"
+        android:id="@+id/itemIcon"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scaleType="centerInside"
         android:contentDescription="@string/icono_folder" />
 
+    <!-- Título dinámico -->
     <TextView
-        android:id="@+id/nombreItem"
-        android:layout_width="wrap_content"
+        android:id="@+id/itemTitle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ejemplo"
-        android:textColor="@color/brown"
+        android:textColor="@color/black"
+        android:textStyle="bold"
         android:textSize="14sp"
+        android:gravity="center"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:layout_marginTop="4dp"/>
+
+    <!-- Descripción breve dinámica (máx. 2 líneas) -->
+    <TextView
+        android:id="@+id/itemDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:layout_marginTop="2dp"/>
+
 </LinearLayout>

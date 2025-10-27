@@ -3,6 +3,12 @@
     <string name="logo_app">logo_app</string>
     <string name="btnPerfil">btnPerfil\n</string>
     <string name="icono_folder">icono_folder</string>
+
+    <!--> Descriptions <-->
+
+    <string name="desc_return_button">Volver</string>
+    <string name="desc_calendar_button">Calendario</string>
+    <string name="desc_add_button">Añadir elemento</string>
     <string name="new_user">Registrarse</string>
     <string name="contraseña">Contraseña</string>
     <string name="log_in">Iniciar Sesion</string>
