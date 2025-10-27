@@ -1,0 +1,18 @@
+Index: app/src/main/java/es/fdi/ucm/pad/notnotion/ui/main/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package es.fdi.ucm.pad.notnotion.ui.main;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.ImageButton;\r\n\r\nimport androidx.activity.EdgeToEdge;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.core.graphics.Insets;\r\nimport androidx.core.view.ViewCompat;\r\nimport androidx.core.view.WindowInsetsCompat;\r\nimport androidx.recyclerview.widget.GridLayoutManager;\r\nimport androidx.recyclerview.widget.RecyclerView;\r\n\r\nimport com.firebase.ui.auth.AuthUI;\r\nimport com.google.firebase.auth.FirebaseAuth;\r\n\r\nimport es.fdi.ucm.pad.notnotion.R;\r\nimport es.fdi.ucm.pad.notnotion.ui.user_logging.LoginActivity;\r\n\r\npublic class MainActivity extends AppCompatActivity {\r\n\r\n    private RecyclerView recyclerView;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        EdgeToEdge.enable(this);\r\n        setContentView(R.layout.activity_main);\r\n        //SOLO PARA PRUEBA\r\n        //*******************************\r\n        FirebaseAuth auth = FirebaseAuth.getInstance();\r\n        if (auth.getCurrentUser() != null) {\r\n            // Cierra sesión de Firebase (y del proveedor si usas FirebaseUI)\r\n            AuthUI.getInstance().signOut(this).addOnCompleteListener(t -> {\r\n                // Nada más que hacer; el usuario ya está deslogueado y verá la UI de login\r\n            });\r\n        }\r\n        //*******************************\r\n\r\n        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {\r\n            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());\r\n            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);\r\n            return insets;\r\n        });\r\n        /*\r\n        Esto para hacer que el recyclerView muestre los items de 3 en 3\r\n        */\r\n        recyclerView = findViewById(R.id.recyclerItems);\r\n        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));\r\n\r\n\r\n        //Boton inicio sesión\r\n        ImageButton btnPerfil = findViewById(R.id.btnPerfil);\r\n        btnPerfil.setOnClickListener(v -> {\r\n            // Lanzar LoginActivity\r\n            Intent intent = new Intent(MainActivity.this, LoginActivity.class);\r\n            startActivity(intent);\r\n        });\r\n    }\r\n    @Override\r\n    protected void onDestroy() {\r\n        super.onDestroy();\r\n        FirebaseAuth.getInstance().signOut();\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/main/MainActivity.java b/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/main/MainActivity.java
+--- a/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/main/MainActivity.java	(revision b1432bec93f3977a5b89d355a3407b1b4a05caa8)
++++ b/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/main/MainActivity.java	(date 1761412777293)
+@@ -27,6 +27,7 @@
+         super.onCreate(savedInstanceState);
+         EdgeToEdge.enable(this);
+         setContentView(R.layout.activity_main);
++
+         //SOLO PARA PRUEBA
+         //*******************************
+         FirebaseAuth auth = FirebaseAuth.getInstance();
