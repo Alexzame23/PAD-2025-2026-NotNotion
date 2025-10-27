@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/main"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -23,18 +24,20 @@
         app:boxCornerRadiusBottomEnd="12dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:hintEnabled="false">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/busquedaBarra"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
+            android:layout_height="wrap_content"
             android:hint="@string/buscar"
             android:inputType="text"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:textColor="@color/black"
-            android:hintTextColor="@color/gray"/>
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:textColor="@color/black" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Texto de ruta debajo de la barra de búsqueda -->
@@ -42,7 +45,7 @@
         android:id="@+id/routeTextShow"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/light_brown"
+        android:background="@color/light_brown_transparent"
         android:text="@string/route"
         android:contentDescription="@string/desc_return_button"
         android:padding="8dp"
