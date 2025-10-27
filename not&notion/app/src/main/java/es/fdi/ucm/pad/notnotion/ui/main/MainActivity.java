@@ -14,9 +14,11 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 import es.fdi.ucm.pad.notnotion.R;
+import es.fdi.ucm.pad.notnotion.ui.calendar.CalendarFragment;
 import es.fdi.ucm.pad.notnotion.ui.user_logging.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         //*******************************
+
+        BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
 
         //contenedor para las notas
         FrameLayout contentContainer = findViewById(R.id.contentContainer);
@@ -61,6 +65,25 @@ public class MainActivity extends AppCompatActivity {
             // Lanzar LoginActivity
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
+        });
+
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            // Limpiar el contenedor antes de inflar otro layout
+            int id = item.getItemId();
+            contentContainer.removeAllViews();
+
+            if (id == R.id.nav_notes) {
+                getLayoutInflater().inflate(R.layout.notes_main, contentContainer, true);
+            } else if (id == R.id.nav_calendar) {
+                getLayoutInflater().inflate(R.layout.calendar_main, contentContainer, true);
+                // Cargar fragmento dentro del FrameLayout
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.contentContainer, new CalendarFragment())
+                        .commit();
+            }
+
+            return true;
         });
     }
     @Override
