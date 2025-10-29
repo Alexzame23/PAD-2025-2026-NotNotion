@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "65686378053-qrvs8h1u70qslvgpo3ok8l3uvk0n90s3.apps.googleusercontent.com",
+          "client_id": "65686378053-9ia3ht3l3nk2mtv95vd879sqrusf8nd9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "es.fdi.ucm.pad.notnotion",
-            "certificate_hash": "6c8fb3783b1b915ecb44cffa0a4ee79cdca86336"
+            "certificate_hash": "8f9eb083bc5d0c45a6d2aa32e3c3e996f700ed60"
           }
         },
         {

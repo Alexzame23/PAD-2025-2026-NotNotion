@@ -1,10 +1,13 @@
 package es.fdi.ucm.pad.notnotion.ui.main;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
+import com.google.firebase.auth.FirebaseUser;
+import com.squareup.picasso.Picasso;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -30,16 +33,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        //SOLO PARA PRUEBA
-        //*******************************
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null) {
-            // Cierra sesión de Firebase (y del proveedor si usas FirebaseUI)
-            AuthUI.getInstance().signOut(this).addOnCompleteListener(t -> {
-                // Nada más que hacer; el usuario ya está deslogueado y verá la UI de login
-            });
-        }
-        //*******************************
 
         BottomNavigationView bottomNavigation = findViewById(R.id.bottomNavigation);
 
@@ -59,13 +52,29 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         */
 
-        //Boton inicio sesión
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         ImageButton btnPerfil = findViewById(R.id.btnPerfil);
-        btnPerfil.setOnClickListener(v -> {
-            // Lanzar LoginActivity
-            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(intent);
-        });
+        if (user != null) {
+            // Mandar a profile_activity
+            if (user.getPhotoUrl() != null) {
+                Uri photoUri = user.getPhotoUrl();
+
+                // Cargar la foto en el botón
+                Picasso.get()
+                        .load(photoUri)
+                        .placeholder(R.drawable.ic_user) // Imagen por defecto
+                        .error(R.drawable.ic_user)       // Si falla la carga
+                        .into(btnPerfil);
+            }
+        }
+        else{
+            btnPerfil.setOnClickListener(v -> {
+                // Lanzar LoginActivity
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
+            });
+        }
+
 
         bottomNavigation.setOnItemSelectedListener(item -> {
             // Limpiar el contenedor antes de transformar
