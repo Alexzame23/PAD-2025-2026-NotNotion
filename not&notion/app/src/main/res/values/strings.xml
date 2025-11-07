@@ -5,7 +5,7 @@
     <string name="icono_folder">icono_folder</string>
 
     <!--> Descriptions <-->
-    <item name="profile_root" type="id">profile_root</item>
+    <string name="profile_root" type="id">profile_root</string>
     <string name="desc_return_button">Atras</string>
     <string name="desc_calendar_button">Calendario</string>
     <string name="desc_notes_button">Notas</string>

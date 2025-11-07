@@ -1,9 +1,12 @@
 package es.fdi.ucm.pad.notnotion.ui.user_logging;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -23,6 +26,7 @@ import java.util.List;
 
 import es.fdi.ucm.pad.notnotion.R;
 import es.fdi.ucm.pad.notnotion.ui.main.MainActivity;
+import es.fdi.ucm.pad.notnotion.ui.user_register.RegisterActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -49,6 +53,13 @@ public class LoginActivity extends AppCompatActivity {
             goToMainActivity();
             return;
         }
+
+        ImageButton btnLanguage = findViewById(R.id.btn_language);
+        btnLanguage.setOnClickListener(v -> showLanguageDialog());
+
+        TextView goToRegister = findViewById(R.id.new_user);
+        goToRegister.setOnClickListener(v -> goToRegisterActivity());
+
         emailField = findViewById(R.id.email);
         passwordField = findViewById(R.id.password);
         loginButton = findViewById(R.id.log_in);
@@ -75,6 +86,11 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         googleButton.setOnClickListener(v -> launchGoogleSignIn());
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(es.fdi.ucm.pad.notnotion.utils.LocaleHelper.applyLocale(newBase));
     }
     private void launchGoogleSignIn() {
         List<AuthUI.IdpConfig> providers = Arrays.asList(
@@ -111,5 +127,25 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void goToRegisterActivity() {
+        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+        startActivity(intent);
+        finish(); // opcional: para que no pueda volver al login con "atrás"
+    }
+
+    private void showLanguageDialog() {
+        final String[] languages = {"Español", "English"};
+        final String[] codes = {"es", "en"};
+
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(getString(R.string.select_language))
+                .setItems(languages, (dialog, which) -> {
+                    String selectedLang = codes[which];
+                    es.fdi.ucm.pad.notnotion.utils.LocaleHelper.setLocale(this, selectedLang);
+                    recreate(); // Recarga la actividad con el nuevo idioma
+                })
+                .show();
     }
 }

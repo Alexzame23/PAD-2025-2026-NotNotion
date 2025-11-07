@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="32dp">
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/logo_icon"
+        android:scaleType="fitCenter"
+        android:layout_marginTop="32dp"
+        android:adjustViewBounds="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Nombre label -->
+    <TextView
+        android:id="@+id/name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/name"
+        app:layout_constraintTop_toBottomOf="@id/logo"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Botón idioma -->
+    <ImageButton
+        android:id="@+id/btn_language"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/lng"
+        app:layout_constraintEnd_toEndOf="@id/name_input"
+        app:layout_constraintTop_toTopOf="@id/name_label"
+        app:layout_constraintBottom_toBottomOf="@id/name_label"
+        android:layout_marginStart="8dp" />
+
+    <!-- Nombre EditText -->
+    <EditText
+        android:id="@+id/name_input"
+        android:inputType="textPersonName"
+        app:layout_constraintTop_toBottomOf="@id/name_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/MyEditText" />
+
+    <!-- Email label -->
+    <TextView
+        android:id="@+id/email_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/email"
+        app:layout_constraintTop_toBottomOf="@id/name_input"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Email EditText -->
+    <EditText
+        android:id="@+id/email_input"
+        android:inputType="textEmailAddress"
+        app:layout_constraintTop_toBottomOf="@id/email_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/MyEditText" />
+
+    <!-- Password label -->
+    <TextView
+        android:id="@+id/password_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/password"
+        app:layout_constraintTop_toBottomOf="@id/email_input"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Password EditText -->
+    <EditText
+        android:id="@+id/password_input"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/password_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/MyEditText" />
+
+    <!-- Confirm Password label -->
+    <TextView
+        android:id="@+id/confirm_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/confirm_password"
+        app:layout_constraintTop_toBottomOf="@id/password_input"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Confirm Password EditText -->
+    <EditText
+        android:id="@+id/confirm_input"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@id/confirm_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/MyEditText" />
+
+    <!-- Botón de registro -->
+    <Button
+        android:id="@+id/btn_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/create_account"
+        app:layout_constraintTop_toBottomOf="@id/confirm_input"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/MyButton" />
+
+    <!-- Texto: ya tienes cuenta -->
+    <TextView
+        android:id="@+id/tv_go_to_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/already_have_an_account"
+        android:layout_marginTop="16dp"
+        android:textColor="?attr/colorPrimary"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintTop_toBottomOf="@id/btn_register"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
