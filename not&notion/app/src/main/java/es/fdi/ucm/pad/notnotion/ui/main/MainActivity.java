@@ -3,8 +3,10 @@ package es.fdi.ucm.pad.notnotion.ui.main;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
@@ -21,6 +23,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 import es.fdi.ucm.pad.notnotion.R;
+import es.fdi.ucm.pad.notnotion.data.firebase.FirebaseFirestoreManager;
 import es.fdi.ucm.pad.notnotion.ui.calendar.CalendarFragment;
 import es.fdi.ucm.pad.notnotion.ui.user_logging.LoginActivity;
 
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
+
         /*
         Esto para hacer que el recyclerView muestre los items de 3 en 3
 
@@ -75,6 +79,22 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseFirestoreManager firestoreManager = new FirebaseFirestoreManager();
+
+        if (firebaseUser != null) {
+            firestoreManager.getCurrentUserData(usr -> {
+                if (usr != null) {
+                    // Aquí tienes todos los datos del usuario desde Firestore
+                    Log.d("MainActivity", "Usuario: " + usr.getUsername());
+                    Log.d("MainActivity", "Email: " + usr.getEmail());
+                    Log.d("MainActivity", "Idioma: " + usr.getPreferences().get("language"));
+                    Log.d("MainActivity", "Tema: " + usr.getPreferences().get("theme"));
+
+                    // Ejemplo: actualizar UI
+                    // AQUI RECOGER LOS DATOS DE LA CARPETA RAIZ (parentFolderID == null)
+            });
+        }
 
         bottomNavigation.setOnItemSelectedListener(item -> {
             // Limpiar el contenedor antes de transformar
