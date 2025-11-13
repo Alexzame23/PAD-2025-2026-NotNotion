@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                         .into(btnPerfil);
             }
 
-            // 👇 NUEVA FUNCIÓN: menú del perfil
+            // NUEVA FUNCIÓN: menú del perfil
             btnPerfil.setOnClickListener(v -> showProfileMenu(btnPerfil));
 
         } else {
