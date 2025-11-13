@@ -64,8 +64,8 @@ public class MainActivity extends AppCompatActivity {
             RecyclerView recyclerFolders = contentContainer.findViewById(R.id.recyclerFolders);
             RecyclerView recyclerNotes = contentContainer.findViewById(R.id.recyclerNotes);
 
-            FoldersAdapter foldersAdapter = new FoldersAdapter();
-            NotesAdapter notesAdapter = new NotesAdapter();
+            // NUEVA FUNCIÓN: menú del perfil
+            btnPerfil.setOnClickListener(v -> showProfileMenu(btnPerfil));
 
             recyclerFolders.setLayoutManager(new GridLayoutManager(this, 3));
             recyclerNotes.setLayoutManager(new GridLayoutManager(this, 3));
