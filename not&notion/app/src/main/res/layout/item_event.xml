@@ -1,8 +1,42 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="8dp">
+    <!-- Hora -->
+    <TextView
+        android:id="@+id/textHour"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        tools:text="08:00"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:textSize="12sp"/>
+    <!-- Contenedor de línea vertical y punto -->
+    <FrameLayout
+        android:id="@+id/lineContainer"
+        android:layout_width="24dp"
+        android:layout_height="match_parent">
+
+        <!-- Línea vertical -->
+        <View
+            android:id="@+id/verticalLine"
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/brown" />
+
+        <!-- Punto del evento -->
+        <View
+            android:id="@+id/eventDot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="0dp"
+            android:background="@drawable/dot"
+            android:elevation="4dp"/>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/tvEventTitle"
@@ -10,12 +44,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/brown"
         android:textStyle="bold"
+        tools:text="Evento Ejemplo"
         android:textSize="16sp"/>
 
-    <TextView
-        android:id="@+id/tvEventTime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/brown"
-        android:textSize="14sp"/>
 </LinearLayout>

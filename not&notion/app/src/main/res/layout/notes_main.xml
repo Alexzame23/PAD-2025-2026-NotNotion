@@ -65,19 +65,37 @@
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"/>
 
-    <!-- RecyclerView para notas/carpetas -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerItems"
-        android:layout_width="0dp"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollItems"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:layout_margin="8dp"
-        android:padding="8dp"
-        android:scrollbars="vertical"
+        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/routeTextShow"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/item_explorer"/>
+        app:layout_constraintStart_toStartOf="@id/routeTextShow"
+        app:layout_constraintEnd_toEndOf="@id/routeTextShow"
+        app:layout_constraintBottom_toTopOf="@id/btnAddNote">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- RecyclerView para carpetas -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerFolders"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"/>
+
+            <!-- RecyclerView para notas -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

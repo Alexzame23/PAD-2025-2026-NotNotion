@@ -1,4 +1,4 @@
-package es.fdi.ucm.pad.notnotion.ui.calendar;
+package es.fdi.ucm.pad.notnotion.ui.Fragments;
 
 import android.os.Bundle;
 import android.util.Log;
