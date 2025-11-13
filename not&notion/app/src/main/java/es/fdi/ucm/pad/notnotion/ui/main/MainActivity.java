@@ -60,6 +60,32 @@ public class MainActivity extends AppCompatActivity {
                 return WindowInsetsCompat.CONSUMED;
             });
 
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            ImageButton btnPerfil = findViewById(R.id.btnPerfil);
+
+            if (user != null) {
+                // Si el usuario tiene foto, la mostramos en el botón
+                if (user.getPhotoUrl() != null) {
+                    Uri photoUri = user.getPhotoUrl();
+                    Picasso.get()
+                            .load(photoUri)
+                            .placeholder(R.drawable.ic_user)
+                            .error(R.drawable.ic_user)
+                            .into(btnPerfil);
+                }
+
+                // NUEVA FUNCIÓN: menú del perfil
+                btnPerfil.setOnClickListener(v -> showProfileMenu(btnPerfil));
+
+            } else {
+                // Si no hay usuario logueado, mandamos a LoginActivity
+                btnPerfil.setOnClickListener(v -> {
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+                });
+            }
+
             // Configurar RecyclerViews
             RecyclerView recyclerFolders = contentContainer.findViewById(R.id.recyclerFolders);
             RecyclerView recyclerNotes = contentContainer.findViewById(R.id.recyclerNotes);
@@ -70,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
             recyclerFolders.setLayoutManager(new GridLayoutManager(this, 3));
             recyclerNotes.setLayoutManager(new GridLayoutManager(this, 3));
 
+            /*
             recyclerFolders.setAdapter(foldersAdapter);
             recyclerNotes.setAdapter(notesAdapter);
 
@@ -89,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 notesAdapter.setNotes(notes);
             });
+             */
         }
 
         // BottomNavigation y resto de tu código tal como lo tenías
