@@ -46,6 +46,7 @@ import es.fdi.ucm.pad.notnotion.data.firebase.NotesManager;
 import es.fdi.ucm.pad.notnotion.data.model.Folder;
 import es.fdi.ucm.pad.notnotion.data.model.Note;
 import es.fdi.ucm.pad.notnotion.ui.Fragments.CalendarFragment;
+import es.fdi.ucm.pad.notnotion.ui.profile.ProfileActivity;
 import es.fdi.ucm.pad.notnotion.ui.user_logging.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -154,7 +155,10 @@ public class MainActivity extends AppCompatActivity {
                             .into(btnPerfil);
                 }
 
-                btnPerfil.setOnClickListener(v -> showProfileMenu(btnPerfil));
+                btnPerfil.setOnClickListener(v -> {
+                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    startActivity(intent);
+                });
 
             } else {
                 // Si NO hay usuario → ir a Login

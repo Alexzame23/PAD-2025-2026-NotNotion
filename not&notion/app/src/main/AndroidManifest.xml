@@ -34,5 +34,11 @@
             android:name=".ui.user_register.RegisterActivity"
             android:exported="true" />
 
+        <activity
+            android:name=".ui.profile.ProfileActivity"
+            android:exported="false" />
+
+        <activity android:name=".ui.events.EventEditActivity" />
+
     </application>
 </manifest>
