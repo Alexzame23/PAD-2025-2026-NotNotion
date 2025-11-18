@@ -15,11 +15,13 @@ import android.text.TextWatcher;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
 import com.squareup.picasso.Picasso;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -45,6 +47,7 @@ import es.fdi.ucm.pad.notnotion.data.firebase.FoldersManager;
 import es.fdi.ucm.pad.notnotion.data.firebase.NotesManager;
 import es.fdi.ucm.pad.notnotion.data.model.Folder;
 import es.fdi.ucm.pad.notnotion.data.model.Note;
+import es.fdi.ucm.pad.notnotion.data.model.User;
 import es.fdi.ucm.pad.notnotion.ui.Fragments.CalendarFragment;
 import es.fdi.ucm.pad.notnotion.ui.Fragments.EditNoteActivity;
 import es.fdi.ucm.pad.notnotion.ui.profile.ProfileActivity;
@@ -55,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestoreManager firestoreManager;
     private FoldersManager foldersManager;
     private NotesManager notesManager;
-    private es.fdi.ucm.pad.notnotion.data.model.User currentUser;
+    private User currentUser;
     private Folder currentFolder;
     private FoldersAdapter foldersAdapter;
     private NotesAdapter notesAdapter;
@@ -96,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
             foldersAdapter = new FoldersAdapter();
             notesAdapter   = new NotesAdapter();
+            notesAdapter.setOnNoteClickListener(note -> { mostrarPantallaEdicion(note); });
 
             recyclerFolders.setLayoutManager(new GridLayoutManager(this, 3));
             recyclerNotes.setLayoutManager(new GridLayoutManager(this, 3));
@@ -186,66 +190,8 @@ public class MainActivity extends AppCompatActivity {
 
                 // -------- TAB NOTAS --------
                 if (id == R.id.nav_notes) {
+                    volverAlExploradorConUI();
 
-                    contentContainer.removeAllViews();
-                    getLayoutInflater().inflate(R.layout.notes_main, contentContainer, true);
-
-                    recyclerFolders = contentContainer.findViewById(R.id.recyclerFolders);
-                    recyclerNotes   = contentContainer.findViewById(R.id.recyclerNotes);
-
-
-                    foldersAdapter = new FoldersAdapter();
-                    notesAdapter   = new NotesAdapter();
-
-                    recyclerFolders.setLayoutManager(new GridLayoutManager(this, 3));
-                    recyclerNotes.setLayoutManager(new GridLayoutManager(this, 3));
-
-                    recyclerFolders.setAdapter(foldersAdapter);
-                    recyclerNotes.setAdapter(notesAdapter);
-
-                    foldersManager = new FoldersManager();
-                    notesManager   = new NotesManager();
-
-                    if (currentFolder == null) {
-                        currentFolder = new Folder("root", "Root", "None", null, null, 0);
-                    }
-                    loadFolderContent(currentFolder);
-                    routePath.clear();
-                    updateRouteText();
-
-                    ImageButton btnGoBack = contentContainer.findViewById(R.id.btnGoBack);
-                    if (btnGoBack != null) {
-                        btnGoBack.setOnClickListener(v -> goBack());
-                    }
-
-                    foldersAdapter.setOnFolderClickListener(folder -> {
-                        navigationStack.add(currentFolder);
-                        loadFolderContent(folder);
-                    });
-
-                    ImageButton btnAddNote = contentContainer.findViewById(R.id.btnAddNote);
-
-                    btnAddNote.setOnClickListener(v -> {
-                        PopupMenu popup = new PopupMenu(MainActivity.this, btnAddNote);
-                        popup.getMenu().add("Nueva carpeta");
-                        popup.getMenu().add("Nueva nota");
-
-                        popup.setOnMenuItemClickListener(itm -> {
-                            String title = itm.getTitle().toString();
-
-                            if (title.equals("Nueva carpeta")) {
-                                createNewFolderDialog();
-                                return true;
-                            }
-                            if (title.equals("Nueva nota")) {
-                                // TODO: implementar
-                                return true;
-                            }
-                            return false;
-                        });
-
-                        popup.show();
-                    });
                 }
 
                 else if (id == R.id.nav_calendar) {
@@ -262,6 +208,158 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+    private void mostrarPantallaEdicion(Note note) {
+        Log.d("EDIT_NOTE", "Entrando a mostrarPantallaEdicion");
+        if (note == null) {
+            Log.e("EDIT_NOTE", "Nota nula recibida");
+            return;
+        }
+
+        FrameLayout contentContainer = findViewById(R.id.contentContainer);
+        if (contentContainer == null) {
+            Log.e("EDIT_NOTE", "contentContainer es null");
+            return;
+        }
+
+        contentContainer.removeAllViews();
+        getLayoutInflater().inflate(R.layout.edit_note, contentContainer, true);
+
+        EditText etTitle = contentContainer.findViewById(R.id.etTitle);
+        EditText etContent = contentContainer.findViewById(R.id.etContent);
+        ImageButton btnSave = contentContainer.findViewById(R.id.btnSave);
+
+        etTitle.setText(note.getTitle());
+        etContent.setText(note.getContent());
+
+        btnSave.setOnClickListener(v -> {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user == null) {
+                Log.e("SAVE_NOTE", "user es null");
+                Toast.makeText(this, "Error: usuario no logueado", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (currentFolder == null) {
+                Log.e("SAVE_NOTE", "currentFolder es null");
+                Toast.makeText(this, "Error: carpeta no definida", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String userId = user.getUid();
+            String folderId = currentFolder.getId();
+            String noteId = note.getId();
+
+            note.setTitle(etTitle.getText().toString());
+            note.setContent(etContent.getText().toString());
+            note.setUpdatedAt(com.google.firebase.Timestamp.now());
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+            if (noteId == null) {
+                // Crear nueva nota
+                db.collection("users")
+                        .document(userId)
+                        .collection("folders")
+                        .document(folderId)
+                        .collection("notes")
+                        .add(note)
+                        .addOnSuccessListener(docRef -> {
+                            note.setId(docRef.getId());
+                            Toast.makeText(this, "Nota creada", Toast.LENGTH_SHORT).show();
+                            volverAlExploradorConUI();
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("SAVE_NOTE", "Error al crear nota", e);
+                            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        });
+            } else {
+                // Actualizar nota existente
+                db.collection("users")
+                        .document(userId)
+                        .collection("folders")
+                        .document(folderId)
+                        .collection("notes")
+                        .document(noteId)
+                        .set(note, SetOptions.merge())
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(this, "Nota actualizada", Toast.LENGTH_SHORT).show();
+                            volverAlExploradorConUI();
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("SAVE_NOTE", "Error al actualizar nota", e);
+                            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        });
+            }
+        });
+    }
+
+    // Esta versión recarga la pantalla principal y vuelve a asignar adapters y listeners
+    private void volverAlExploradorConUI() {
+        FrameLayout contentContainer = findViewById(R.id.contentContainer);
+        contentContainer.removeAllViews();
+        getLayoutInflater().inflate(R.layout.notes_main, contentContainer, true);
+
+        // --- RecyclerViews ---
+        recyclerFolders = contentContainer.findViewById(R.id.recyclerFolders);
+        recyclerNotes = contentContainer.findViewById(R.id.recyclerNotes);
+
+        foldersAdapter = new FoldersAdapter();
+        notesAdapter = new NotesAdapter();
+
+        recyclerFolders.setLayoutManager(new GridLayoutManager(this, 3));
+        recyclerNotes.setLayoutManager(new GridLayoutManager(this, 3));
+
+        recyclerFolders.setAdapter(foldersAdapter);
+        recyclerNotes.setAdapter(notesAdapter);
+
+        // --- Listeners ---
+        foldersAdapter.setOnFolderClickListener(folder -> {
+            navigationStack.add(currentFolder);
+            loadFolderContent(folder);
+        });
+
+        notesAdapter.setOnNoteClickListener(note -> mostrarPantallaEdicion(note));
+
+        // --- Botón atrás ---
+        ImageButton btnGoBack = contentContainer.findViewById(R.id.btnGoBack);
+        if (btnGoBack != null) btnGoBack.setOnClickListener(v -> goBack());
+
+        // --- Botón añadir nota/carpeta ---
+        ImageButton btnAddNote = contentContainer.findViewById(R.id.btnAddNote);
+        if (btnAddNote != null) {
+            btnAddNote.setOnClickListener(v -> {
+                PopupMenu popup = new PopupMenu(MainActivity.this, btnAddNote);
+                popup.getMenu().add("Nueva carpeta");
+                popup.getMenu().add("Nueva nota");
+
+                popup.setOnMenuItemClickListener(itm -> {
+                    if (itm.getTitle().equals("Nueva carpeta")) {
+                        createNewFolderDialog();
+                        return true;
+                    }
+                    if (itm.getTitle().equals("Nueva nota")) {
+                        // Crear nota nueva con ID null
+                        Note newNote = new Note();
+                        newNote.setId(null);
+                        mostrarPantallaEdicion(newNote);
+                        return true;
+                    }
+                    return false;
+                });
+
+                popup.show();
+            });
+        }
+
+        // --- Cargar contenido de la carpeta actual ---
+        if (currentFolder != null) {
+            loadFolderContent(currentFolder);
+        }
+    }
+
+
+
+
     private void goBack() {
         if (navigationStack.isEmpty()) return;
 
@@ -352,7 +450,9 @@ public class MainActivity extends AppCompatActivity {
 
             List<Note> notes = new ArrayList<>();
             for (QueryDocumentSnapshot doc : noteSnapshot) {
-                notes.add(doc.toObject(Note.class));
+                Note note = doc.toObject(Note.class);
+                note.setId(doc.getId()); // <- Esto es clave
+                notes.add(note);
             }
 
             notesAdapter.setNotes(notes);
