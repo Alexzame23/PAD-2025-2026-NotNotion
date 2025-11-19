@@ -31,7 +31,7 @@ public class CalendarEventsManager {
             Log.e("Firestore", "No hay usuario autenticado");
             return null;
         }
-        return "users/" + uid + "/calendar_events";
+        return "users/" + uid + "/events";
     }
 
     /**
@@ -71,7 +71,7 @@ public class CalendarEventsManager {
     /**
      * Actualiza un evento existente
      */
-    public void updateEvent(@NonNull CalendarEvent event) {
+    public void updateEvent(@NonNull CalendarEvent event, @NonNull Runnable onComplete) {
         String path = getUserEventsPath();
         if (path == null) return;
 
@@ -80,21 +80,28 @@ public class CalendarEventsManager {
         db.collection(path)
                 .document(event.getId())
                 .set(event)
-                .addOnSuccessListener(aVoid -> Log.d("Firestore", "Evento actualizado"))
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Evento actualizado");
+                    onComplete.run();
+                })
                 .addOnFailureListener(e -> Log.e("Firestore", "Error al actualizar evento", e));
     }
+
 
     /**
      * Elimina un evento del calendario
      */
-    public void deleteEvent(String eventId) {
+    public void deleteEvent(@NonNull CalendarEvent event, @NonNull Runnable onComplete) {
         String path = getUserEventsPath();
         if (path == null) return;
 
         db.collection(path)
-                .document(eventId)
+                .document(event.getId())
                 .delete()
-                .addOnSuccessListener(aVoid -> Log.d("Firestore", "Evento eliminado"))
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Evento eliminado");
+                    onComplete.run();
+                })
                 .addOnFailureListener(e -> Log.e("Firestore", "Error al eliminar evento", e));
     }
 
@@ -124,6 +131,26 @@ public class CalendarEventsManager {
                 .addOnSuccessListener(listener)
                 .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener eventos por nota", e));
     }
+
+    public void getEventById(String eventId, OnSuccessListener<CalendarEvent> listener) {
+        String path = getUserEventsPath();
+        if (path == null) return;
+
+        db.collection(path)
+                .document(eventId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        CalendarEvent ev = doc.toObject(CalendarEvent.class);
+                        ev.setId(doc.getId());
+                        listener.onSuccess(ev);
+                    } else {
+                        Log.e("Firestore", "Evento no encontrado");
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener evento", e));
+    }
+
 
     /**
      * Obtiene los eventos futuros (posteriores a 'ahora')

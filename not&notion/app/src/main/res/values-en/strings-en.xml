@@ -30,4 +30,10 @@
     <string name="add_note">Add note</string>
     <string name="profile_picture">profile_picture</string>
     <string name="editar_foto_perfil">edit_profile_picture</string>
+    <string name="Note_content">Start typing...</string>
+    <string name="note_title">Title</string>
+
+
+
+    <string name="logout">Logout</string>
 </resources>

@@ -2,7 +2,9 @@ package es.fdi.ucm.pad.notnotion.data.model;
 
 import com.google.firebase.Timestamp;
 
-public class CalendarEvent {
+import java.io.Serializable;
+
+public class CalendarEvent implements Serializable {
 
     private String id;
     private String title;

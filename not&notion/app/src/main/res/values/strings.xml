@@ -29,4 +29,8 @@
     <string name="add_note">Añadir nota</string>
     <string name="profile_picture">foto_perfil</string>
     <string name="editar_foto_perfil">editar_foto_perfil</string>
+    <string name="Note_content">Comienza a escribir...</string>
+    <string name="note_title">Titulo</string>
+
+    <string name="logout">Cerrar sesión</string>
 </resources>

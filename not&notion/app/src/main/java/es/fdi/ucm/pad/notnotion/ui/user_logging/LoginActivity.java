@@ -101,6 +101,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
+
+
     // GOOGLE LOGIN
     private void launchGoogleSignIn() {
         List<AuthUI.IdpConfig> providers = Arrays.asList(
