@@ -72,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
     private final List<Folder> navigationStack = new ArrayList<>();
     private TextView routeTextShow;
 
+    private EditText busquedaBarra;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (contentContainer != null) {
             getLayoutInflater().inflate(R.layout.notes_main, contentContainer, true);
+            busquedaBarra = contentContainer.findViewById(R.id.busquedaBarra);
 
             ViewCompat.setOnApplyWindowInsetsListener(contentContainer, (v, insets) -> {
                 Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -435,4 +438,43 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         // Ya no hacemos signOut automático
     }
+    public void SearchNotes(View v) {
+        String query = busquedaBarra.getText().toString().trim().toLowerCase();
+        if (currentFolder == null) return;
+
+        // Buscar carpetas
+        foldersManager.getSubfolders(currentFolder.getId(), folderSnapshot -> {
+            List<Folder> filteredFolders = new ArrayList<>();
+            for (QueryDocumentSnapshot doc : folderSnapshot) {
+                Folder folder = doc.toObject(Folder.class);
+                folder.setId(doc.getId());
+
+                Log.d("SearchItems", "Folder recibido: " + folder.getName());
+
+                if (folder.getName() != null && folder.getName().toLowerCase().contains(query)) {
+                    filteredFolders.add(folder);
+                    Log.d("SearchItems", "Folder coincide: " + folder.getName());
+                }
+            }
+            foldersAdapter.setFolders(filteredFolders);
+        });
+
+        // Buscar notas
+        notesManager.getNotesByFolder(currentFolder.getId(), noteSnapshot -> {
+            List<Note> filteredNotes = new ArrayList<>();
+            for (QueryDocumentSnapshot doc : noteSnapshot) {
+                Note note = doc.toObject(Note.class);
+                note.setId(doc.getId());
+
+                Log.d("SearchItems", "Nota recibida: " + note.getTitle());
+
+                if (note.getTitle() != null && note.getTitle().toLowerCase().contains(query)) {
+                    filteredNotes.add(note);
+                    Log.d("SearchItems", "Nota coincide: " + note.getTitle());
+                }
+            }
+            notesAdapter.setNotes(filteredNotes);
+        });
+    }
+
 }
