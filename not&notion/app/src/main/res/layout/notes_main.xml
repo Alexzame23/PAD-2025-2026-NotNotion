@@ -7,35 +7,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg">
+
     <!-- Barra de búsqueda -->
     <EditText
         android:id="@+id/busquedaBarra"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/edit_text_bg"
         android:hint="@string/buscar"
         android:inputType="text"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:padding="12dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:hintEnabled="false"/>
+        app:layout_constraintEnd_toStartOf="@+id/search_button"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"/>
 
-        <!-- <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/busquedaBarra"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/buscar"
-            android:inputType="text"
-            android:singleLine="true"
-            android:imeOptions="actionDone"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:textColor="@color/black" />
-    </com.google.android.material.textfield.TextInputLayout> -->
+    <!-- Botón de búsqueda -->
+    <ImageButton
+        android:id="@+id/search_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/buscar"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/search"
+        android:onClick="SearchNotes"
+        app:layout_constraintStart_toEndOf="@id/busquedaBarra"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/busquedaBarra"
+        app:layout_constraintBottom_toBottomOf="@id/busquedaBarra"
+        android:layout_marginEnd="16dp"/>
 
     <!-- Texto de ruta debajo de la barra de búsqueda -->
     <TextView
@@ -47,9 +49,11 @@
         android:textColor="@color/text_button"
         android:gravity="center_vertical"
         app:layout_constraintTop_toBottomOf="@id/busquedaBarra"
-        app:layout_constraintStart_toStartOf="@id/busquedaBarra"
-        app:layout_constraintEnd_toEndOf="@id/busquedaBarra"
-        android:layout_marginTop="4dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"/>
 
     <!-- BOTÓN VOLVER ATRÁS -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -64,7 +68,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="16dp"/>
 
-
     <!-- BOTÓN AÑADIR NOTA -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAddNote"
@@ -78,35 +81,39 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="16dp"/>
 
+    <!-- Scroll con RecyclerViews -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollItems"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="false"
         app:layout_constraintTop_toBottomOf="@id/routeTextShow"
-        app:layout_constraintStart_toStartOf="@id/routeTextShow"
-        app:layout_constraintEnd_toEndOf="@id/routeTextShow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/btnAddNote">
-            <LinearLayout
-                android:orientation="vertical"
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- RecyclerView para carpetas -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerFolders"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <!-- RecyclerView para carpetas -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerFolders"
-                    android:layout_width="match_parent"
-                    android:nestedScrollingEnabled="false"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"/>
-                <!-- RecyclerView para notas -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerNotes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    android:clipToPadding="false"
-                    android:scrollbars="vertical"/>
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:padding="16dp"/>
+
+            <!-- RecyclerView para notas -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"/>
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
