@@ -15,12 +15,19 @@ import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.graphics.Bitmap;
+import android.widget.ImageView;
+import android.app.AlertDialog;
+import android.widget.Toast;
+import android.view.MotionEvent;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import es.fdi.ucm.pad.notnotion.R;
 import es.fdi.ucm.pad.notnotion.data.model.ContentBlock;
+import es.fdi.ucm.pad.notnotion.utils.ImageHelper;
 
 // Vista para el editor de texto, splannable para aplicar en el momento
 public class TextEditorView extends LinearLayout {
@@ -43,6 +50,8 @@ public class TextEditorView extends LinearLayout {
     // Rastrear spans activos que se están extendiendo
     private List<Object> activeSpans = new ArrayList<>();
 
+    private List<String> insertedImages = new ArrayList<>();
+
     public TextEditorView(Context context) {
         super(context);
         init(context);
@@ -60,6 +69,10 @@ public class TextEditorView extends LinearLayout {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
+
+        if (insertedImages == null) {
+            insertedImages = new ArrayList<>();
+        }
 
         createMainEditor();
     }
@@ -255,34 +268,48 @@ public class TextEditorView extends LinearLayout {
         return currentTextSize;
     }
 
-    // Carga contenido desde una lista de bloques
+
+     // Carga contenido desde una lista de bloques
     public void loadContent(List<ContentBlock> blocks) {
         if (blocks == null || blocks.isEmpty()) {
             mainEditor.setText("");
+            insertedImages.clear();
             return;
         }
 
-        SpannableStringBuilder builder = new SpannableStringBuilder();
+        SpannableStringBuilder textBuilder = new SpannableStringBuilder();
+        insertedImages.clear();
 
         for (ContentBlock block : blocks) {
             if (block.getType() == ContentBlock.TYPE_TEXT) {
+                // Cargar TEXTO
                 String text = block.getTextContent();
                 if (text == null || text.isEmpty()) {
                     continue;
                 }
 
-                int start = builder.length();
-                builder.append(text);
-                int end = builder.length();
+                int start = textBuilder.length();
+                textBuilder.append(text);
+                int end = textBuilder.length();
 
-                applyStyleToBlock(builder, start, end, block.getTextStyle(), block.getTextSize());
+                applyStyleToBlock(textBuilder, start, end, block.getTextStyle(), block.getTextSize());
+
+            } else if (block.getType() == ContentBlock.TYPE_IMAGE) {
+                // Cargar IMAGEN
+                String base64Image = block.getMediaUrl();
+                if (base64Image != null && !base64Image.isEmpty()) {
+                    addImageBlock(base64Image);
+                    Log.d(TAG, "Imagen cargada desde ContentBlock");
+                }
             }
         }
 
         isUpdatingText = true;
-        mainEditor.setText(builder);
+        mainEditor.setText(textBuilder);
         mainEditor.setSelection(mainEditor.getText().length());
         isUpdatingText = false;
+
+        Log.d(TAG, "Contenido cargado: " + blocks.size() + " bloques");
     }
 
     // Aplica estilo a un bloque específico al cargar
@@ -338,35 +365,43 @@ public class TextEditorView extends LinearLayout {
         }
     }
 
-    // Obtiene el contenido como lista de bloques
+    //Obtiene el contenido como lista de bloques
     public List<ContentBlock> getContentBlocks() {
         List<ContentBlock> blocks = new ArrayList<>();
 
         Editable editable = mainEditor.getText();
         String text = editable.toString();
 
-        if (text.trim().isEmpty()) {
-            return blocks;
-        }
+        // Añadir bloques de TEXTO
+        if (!text.trim().isEmpty()) {
+            int length = text.length();
+            int currentPos = 0;
 
-        int length = text.length();
-        int currentPos = 0;
+            while (currentPos < length) {
+                int nextChange = findNextStyleChange(editable, currentPos);
+                String segmentText = text.substring(currentPos, nextChange);
+                int style = getStyleAtPosition(editable, currentPos);
+                int size = getSizeAtPosition(editable, currentPos);
 
-        while (currentPos < length) {
-            int nextChange = findNextStyleChange(editable, currentPos);
-            String segmentText = text.substring(currentPos, nextChange);
-            int style = getStyleAtPosition(editable, currentPos);
-            int size = getSizeAtPosition(editable, currentPos);
+                if (!segmentText.isEmpty()) {
+                    blocks.add(ContentBlock.createTextBlock(segmentText, style, size));
+                    Log.d(TAG, "Bloque de texto guardado: '" + segmentText + "' estilo=" + style);
+                }
 
-            if (!segmentText.isEmpty()) {
-                blocks.add(ContentBlock.createTextBlock(segmentText, style, size));
-                Log.d(TAG, "Bloque guardado: '" + segmentText + "' estilo=" + style + " tamaño=" + size);
+                currentPos = nextChange;
             }
-
-            currentPos = nextChange;
         }
 
-        Log.d(TAG, "Total bloques guardados: " + blocks.size());
+
+        // Añadir bloques de IMÁGENES
+        for (String base64Image : insertedImages) {
+            blocks.add(ContentBlock.createImageBlock(base64Image));
+            Log.d(TAG, "Bloque de imagen guardado (Base64 length: " + base64Image.length() + ")");
+        }
+
+        Log.d(TAG, "Total bloques guardados: " + blocks.size() +
+                " (" + (blocks.size() - insertedImages.size()) + " texto, " +
+                insertedImages.size() + " imágenes)");
         return blocks;
     }
 
@@ -449,8 +484,113 @@ public class TextEditorView extends LinearLayout {
         return 16;
     }
 
-    public void addImageBlock(String imageUrl) {
-        mainEditor.append("\n[Imagen: " + imageUrl + "]\n");
+
+    // Añade un bloque de imagen desde Base64 con opción de eliminar
+    public void addImageBlock(String base64Image) {
+        if (base64Image == null || base64Image.isEmpty()) {
+            Log.e(TAG, "Base64 de imagen vacío");
+            return;
+        }
+
+        // Guardar en la lista
+        insertedImages.add(base64Image);
+
+        // Crear contenedor
+        LinearLayout imageContainer = new LinearLayout(context);
+        imageContainer.setOrientation(VERTICAL);
+        LinearLayout.LayoutParams containerParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        containerParams.setMargins(0, 16, 0, 16);
+        imageContainer.setLayoutParams(containerParams);
+
+        // Guardar el Base64 en el TAG para identificar esta imagen
+        imageContainer.setTag(base64Image);
+
+        // Crear ImageView
+        ImageView imageView = new ImageView(context);
+        LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                600
+        );
+        imageView.setLayoutParams(imageParams);
+        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        imageView.setAdjustViewBounds(true);
+
+        // Convertir Base64 a Bitmap
+        Bitmap bitmap = ImageHelper.convertBase64ToBitmap(base64Image);
+        if (bitmap != null) {
+            imageView.setImageBitmap(bitmap);
+            Log.d(TAG, "Imagen cargada desde Base64");
+        } else {
+            Log.e(TAG, "Error al decodificar Base64");
+            imageView.setImageResource(R.drawable.icon_note);
+        }
+
+        imageContainer.addView(imageView);
+
+        // Click largo para borrar
+        imageContainer.setOnLongClickListener(v -> {
+            showDeleteImageDialog(imageContainer);
+            return true; // Consumir el evento
+        });
+
+        // Feedback visual: cambiar fondo al presionar
+        imageContainer.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    imageContainer.setAlpha(0.7f); // Oscurecer al presionar
+                    break;
+                case android.view.MotionEvent.ACTION_UP:
+                case android.view.MotionEvent.ACTION_CANCEL:
+                    imageContainer.setAlpha(1.0f); // Restaurar
+                    break;
+            }
+            return false; // No consumir, dejar que el LongClick funcione
+        });
+
+        // Añadir antes del mainEditor
+        int insertPosition = indexOfChild(mainEditor);
+        addView(imageContainer, insertPosition);
+
+        Log.d(TAG, "Imagen añadida. Total: " + insertedImages.size());
+    }
+
+
+    // Muestra diálogo de confirmación para eliminar una imagen
+    private void showDeleteImageDialog(View imageContainer) {
+        new android.app.AlertDialog.Builder(context)
+                .setTitle("Eliminar imagen")
+                .setMessage("¿Estás seguro de que quieres eliminar esta imagen?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Eliminar", (dialog, which) -> {
+                    // Obtener el Base64 del TAG
+                    String base64ToRemove = (String) imageContainer.getTag();
+
+                    if (base64ToRemove != null) {
+                        // Eliminar de la lista
+                        boolean removed = insertedImages.remove(base64ToRemove);
+
+                        if (removed) {
+                            Log.d(TAG, "✓ Imagen eliminada de la lista");
+                        } else {
+                            Log.w(TAG, "⚠️ Imagen no encontrada en la lista");
+                        }
+
+                        // Eliminar de la vista
+                        removeView(imageContainer);
+
+                        Log.d(TAG, "Total imágenes restantes: " + insertedImages.size());
+
+                        // Feedback al usuario
+                        android.widget.Toast.makeText(context,
+                                "Imagen eliminada",
+                                android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     // Métodos de compatibilidad
