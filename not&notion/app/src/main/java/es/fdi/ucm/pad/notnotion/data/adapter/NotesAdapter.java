@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.ImageView;
+import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import es.fdi.ucm.pad.notnotion.R;
 import es.fdi.ucm.pad.notnotion.data.model.Note;
+import es.fdi.ucm.pad.notnotion.utils.ImageHelper;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHolder> {
 
@@ -59,17 +61,45 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
 
         holder.titleView.setText(note.getTitle());
 
-        if (note.getCoverImageUrl() != null && !note.getCoverImageUrl().isEmpty()) {
+        // Cargar imagen de portada si existe
+        String coverUrl = note.getCoverImageUrl();
+
+        if (coverUrl != null && !coverUrl.isEmpty()) {
+            // HAY PORTADA
+
+            // Mostrar portada, OCULTAR icono por defecto
             holder.coverImageView.setVisibility(View.VISIBLE);
-            Picasso.get()
-                    .load(note.getCoverImageUrl())
-                    .placeholder(R.drawable.icon_note)
-                    .error(R.drawable.icon_note)
-                    .resize(200, 200)
-                    .centerCrop()
-                    .into(holder.coverImageView);
+            holder.defaultIconView.setVisibility(View.GONE);
+
+            // Detectar si es Base64 o URL
+            if (ImageHelper.isValidBase64(coverUrl)) {
+                // Convertir a Bitmap
+                Bitmap bitmap = ImageHelper.convertBase64ToBitmap(coverUrl);
+
+                if (bitmap != null) {
+                    holder.coverImageView.setImageBitmap(bitmap);
+                } else {
+                    // Si falla la decodificación, volver a mostrar icono por defecto
+                    holder.coverImageView.setVisibility(View.GONE);
+                    holder.defaultIconView.setVisibility(View.VISIBLE);
+                }
+
+            } else {
+                // Es URL - Usar Picasso
+                Picasso.get()
+                        .load(coverUrl)
+                        .placeholder(R.drawable.icon_note)
+                        .error(R.drawable.icon_note)
+                        .resize(200, 200)
+                        .centerCrop()
+                        .into(holder.coverImageView);
+            }
         } else {
+            // NO HAY PORTADA
+
+            // MOSTRAR icono por defecto
             holder.coverImageView.setVisibility(View.GONE);
+            holder.defaultIconView.setVisibility(View.VISIBLE);
         }
 
         // CLICK NORMAL
@@ -99,11 +129,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     static class NoteViewHolder extends RecyclerView.ViewHolder {
         TextView titleView;
         ImageView coverImageView;
+        ImageView defaultIconView;
 
         public NoteViewHolder(@NonNull View itemView) {
             super(itemView);
             titleView = itemView.findViewById(R.id.noteTitle);
             coverImageView = itemView.findViewById(R.id.noteCoverImage);
+            defaultIconView = itemView.findViewById(R.id.noteIcon);
         }
     }
 }
