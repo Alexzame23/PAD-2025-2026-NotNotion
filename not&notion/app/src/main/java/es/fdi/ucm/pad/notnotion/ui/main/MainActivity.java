@@ -295,13 +295,14 @@ public class MainActivity extends AppCompatActivity {
         FrameLayout contentContainer = findViewById(R.id.contentContainer);
         contentContainer.removeAllViews();
         getLayoutInflater().inflate(R.layout.notes_main, contentContainer, true);
+        busquedaBarra = contentContainer.findViewById(R.id.busquedaBarra);
+        busquedaBarra.setText("");
+        String query = busquedaBarra.getText().toString().trim();
 
         // --- RecyclerViews ---
         recyclerFolders = contentContainer.findViewById(R.id.recyclerFolders);
         recyclerNotes = contentContainer.findViewById(R.id.recyclerNotes);
 
-        foldersAdapter = new FoldersAdapter();
-        notesAdapter = new NotesAdapter();
 
         recyclerFolders.setLayoutManager(new GridLayoutManager(this, 3));
         recyclerNotes.setLayoutManager(new GridLayoutManager(this, 3));
@@ -352,6 +353,8 @@ public class MainActivity extends AppCompatActivity {
         if (currentFolder != null) {
             loadFolderContent(currentFolder);
         }
+        foldersAdapter.filter(query);
+        notesAdapter.filter(query);
     }
 
 
@@ -488,42 +491,9 @@ public class MainActivity extends AppCompatActivity {
         // Ya no hacemos signOut automático
     }
     public void SearchNotes(View v) {
-        String query = busquedaBarra.getText().toString().trim().toLowerCase();
-        if (currentFolder == null) return;
-
-        // Buscar carpetas
-        foldersManager.getSubfolders(currentFolder.getId(), folderSnapshot -> {
-            List<Folder> filteredFolders = new ArrayList<>();
-            for (QueryDocumentSnapshot doc : folderSnapshot) {
-                Folder folder = doc.toObject(Folder.class);
-                folder.setId(doc.getId());
-
-                Log.d("SearchItems", "Folder recibido: " + folder.getName());
-
-                if (folder.getName() != null && folder.getName().toLowerCase().contains(query)) {
-                    filteredFolders.add(folder);
-                    Log.d("SearchItems", "Folder coincide: " + folder.getName());
-                }
-            }
-            foldersAdapter.setFolders(filteredFolders);
-        });
-
-        // Buscar notas
-        notesManager.getNotesByFolder(currentFolder.getId(), noteSnapshot -> {
-            List<Note> filteredNotes = new ArrayList<>();
-            for (QueryDocumentSnapshot doc : noteSnapshot) {
-                Note note = doc.toObject(Note.class);
-                note.setId(doc.getId());
-
-                Log.d("SearchItems", "Nota recibida: " + note.getTitle());
-
-                if (note.getTitle() != null && note.getTitle().toLowerCase().contains(query)) {
-                    filteredNotes.add(note);
-                    Log.d("SearchItems", "Nota coincide: " + note.getTitle());
-                }
-            }
-            notesAdapter.setNotes(filteredNotes);
-        });
+        String query = busquedaBarra.getText().toString().trim();
+        foldersAdapter.filter(query);
+        notesAdapter.filter(query);
     }
 
 }
