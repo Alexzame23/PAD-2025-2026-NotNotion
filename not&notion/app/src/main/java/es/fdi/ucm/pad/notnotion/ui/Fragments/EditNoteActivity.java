@@ -1,10 +1,15 @@
 package es.fdi.ucm.pad.notnotion.ui.Fragments;
 
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -85,6 +90,7 @@ public class EditNoteActivity extends AppCompatActivity {
     // Lanzadores de actividad para seleccionar archivos
     private ActivityResultLauncher<Intent> pickCoverLauncher;
     private ActivityResultLauncher<Intent> pickContentImageLauncher;
+    private ActivityResultLauncher<Intent> pickDocumentLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,11 +106,9 @@ public class EditNoteActivity extends AppCompatActivity {
         notesManager = new NotesManager();
 
         // Obtener datos del Intent
-        // MainActivity nos pasa la nota y el ID de carpeta por aquí
         if (!loadIntentData()) {
-            // Si no pudimos cargar los datos, algo salió mal
             Toast.makeText(this, "Error: datos incompletos", Toast.LENGTH_SHORT).show();
-            finish(); // Cerrar esta Activity y volver a MainActivity
+            finish();
             return;
         }
 
@@ -121,8 +125,7 @@ public class EditNoteActivity extends AppCompatActivity {
         setupListeners();
     }
 
-
-     // Carga los datos que MainActivity nos pasó mediante el Intent.
+    // Carga los datos que MainActivity nos pasó mediante el Intent.
     private boolean loadIntentData() {
         Intent intent = getIntent();
 
@@ -145,7 +148,6 @@ public class EditNoteActivity extends AppCompatActivity {
 
         return true;
     }
-
 
     // Inicializa todas las referencias a las vistas del layout.
     private void initializeViews() {
@@ -213,6 +215,8 @@ public class EditNoteActivity extends AppCompatActivity {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri selectedUri = result.getData().getData();
 
+                        coverImage.setVisibility(View.VISIBLE);
+                        btnAddCover.setVisibility(View.GONE);
                         Log.d(TAG, "CONTENIDO: Imagen seleccionada");
                         Log.d(TAG, "URI: " + selectedUri);
 
@@ -254,9 +258,20 @@ public class EditNoteActivity extends AppCompatActivity {
                         });
                     }
                 }
-        );*/
-    }
+        );
 
+        // Lanzador para añadir documentos al contenido
+        pickDocumentLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri documentUri = result.getData().getData();
+                        Log.d(TAG, "Documento seleccionado: " + documentUri);
+                        handleDocumentSelected(documentUri);
+                    }
+                }
+        );
+    }
 
     // Carga los datos de la nota en la interfaz
     private void loadNoteData() {
@@ -291,13 +306,12 @@ public class EditNoteActivity extends AppCompatActivity {
     // Configura todos los listeners de los botones.
     private void setupListeners() {
 
-        // IMAGEN DE PORTADA(No func)
+        // IMAGEN DE PORTADA
         coverContainer.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK,
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             pickCoverLauncher.launch(intent);
         });
-
 
         // Botones de estilos
         btnBold.setOnClickListener(v -> {
@@ -329,17 +343,20 @@ public class EditNoteActivity extends AppCompatActivity {
 
         btnTextSize.setOnClickListener(v -> showTextSizeDialog());
 
-
         // Boton para añadir contenido
         btnAddContent.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(this, btnAddContent);
             popup.getMenu().add(0, 1, 0, "Añadir imagen");
+            popup.getMenu().add(0, 2, 1, "Añadir documento"); // nueva opción
 
             popup.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == 1) {
                     Intent intent = new Intent(Intent.ACTION_PICK,
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     pickContentImageLauncher.launch(intent);
+                    return true;
+                } else if (item.getItemId() == 2) {
+                    openDocumentPicker();
                     return true;
                 }
                 return false;
@@ -348,18 +365,90 @@ public class EditNoteActivity extends AppCompatActivity {
             popup.show();
         });
 
-
         // Boton volver
-        btnBack.setOnClickListener(v -> {
-            saveNoteAndFinish();
+        btnBack.setOnClickListener(v -> saveNoteAndFinish());
+    }
+
+    // Abre el selector de documentos (PDF, Word, etc.)
+    private void openDocumentPicker() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/vnd.ms-excel",
+                "text/plain"
         });
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        pickDocumentLauncher.launch(intent);
+    }
+
+    // Maneja el documento seleccionado: persiste permisos, obtiene nombre y tipo, e inserta el bloque interactivo
+    private void handleDocumentSelected(Uri uri) {
+        if (uri == null) return;
+
+        try {
+            // Persistir permiso de lectura para poder abrirlo más tarde
+            final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+            try {
+                getContentResolver().takePersistableUriPermission(uri, takeFlags);
+            } catch (SecurityException se) {
+                Log.w(TAG, "No se pudo tomar permiso persistente: " + se.getMessage());
+            }
+
+            String name = getFileName(uri);
+            String mimeType = getContentResolver().getType(uri);
+            if (mimeType == null) {
+                mimeType = "*/*";
+            }
+
+            // Insertar bloque interactivo en el editor (pasamos nombre, uri y mimeType)
+            textEditor.addDocumentBlock(name, uri.toString(), mimeType);
+            Toast.makeText(this, "Documento añadido", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Documento añadido al editor: " + uri + " mime=" + mimeType);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error al procesar documento seleccionado", e);
+            Toast.makeText(this, "Error al añadir documento: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Obtiene el nombre para mostrar del archivo referenciado por la Uri
+    private String getFileName(Uri uri) {
+        String result = null;
+        Cursor cursor = null;
+        try {
+            cursor = getContentResolver().query(uri, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (idx >= 0) {
+                    result = cursor.getString(idx);
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "No se pudo obtener nombre archivo: " + e.getMessage());
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+
+        if (result == null) {
+            // Fallback: último segmento de la ruta
+            String path = uri.getLastPathSegment();
+            if (path != null) {
+                int slash = path.lastIndexOf('/');
+                result = (slash >= 0) ? path.substring(slash + 1) : path;
+            } else {
+                result = "documento";
+            }
+        }
+        return result;
     }
 
     // Actualiza el estilo del texto según los botones activos
     private void updateTextStyle() {
         int style = ContentBlock.STYLE_NORMAL;
 
-        // Determinar el estilo basándose en las combinaciones activas
         if (isBoldActive && isItalicActive && isUnderlineActive) {
             style = ContentBlock.STYLE_BOLD_ITALIC_UNDERLINE;
         } else if (isBoldActive && isItalicActive) {
@@ -388,7 +477,6 @@ public class EditNoteActivity extends AppCompatActivity {
         }
     }
 
-
     // Muestra un diálogo para seleccionar el tamaño del texto
     private void showTextSizeDialog() {
         String[] sizes = {"12sp", "14sp", "16sp", "18sp", "20sp", "24sp", "28sp", "32sp"};
@@ -404,8 +492,8 @@ public class EditNoteActivity extends AppCompatActivity {
                 .show();
     }
 
-    // Sube una imagen a Firebase Storage y devuelve la URL mediante un callback (No func)
-    /*private void uploadImageToStorage(Uri imageUri, OnUploadCompleteListener listener) {
+    // Sube una imagen a Firebase Storage y devuelve la URL mediante un callback
+    private void uploadImageToStorage(Uri imageUri, OnUploadCompleteListener listener) {
         // Generar un nombre único para la imagen
         String filename = "images/" + UUID.randomUUID().toString() + ".jpg";
         StorageReference imageRef = storageRef.child(filename);
@@ -430,12 +518,10 @@ public class EditNoteActivity extends AppCompatActivity {
                 });
     }*/
 
-
     // Guarda la nota y cierra la Activity
     private void saveNoteAndFinish() {
         Log.d(TAG, "Iniciando guardado de nota");
 
-        // Verificar que hay un usuario autenticado
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             Toast.makeText(this, "Error: usuario no logueado", Toast.LENGTH_SHORT).show();
@@ -443,49 +529,41 @@ public class EditNoteActivity extends AppCompatActivity {
             return;
         }
 
-        // Validar que hay un título
         String title = etTitle.getText().toString().trim();
         if (title.isEmpty()) {
             Toast.makeText(this, "El título es obligatorio", Toast.LENGTH_SHORT).show();
-            etTitle.requestFocus(); // Poner el cursor en el campo de título
+            etTitle.requestFocus();
             return;
         }
 
-        // Actualizar los datos de la nota
         note.setTitle(title);
         note.setContentBlocks(textEditor.getContentBlocks());
         note.setFolderId(folderId);
         note.setUpdatedAt(Timestamp.now());
 
-        // Si hay una nueva imagen de portada, subirla primero
-        /*if (selectedCoverUri != null) {
+        if (selectedCoverUri != null) {
             Log.d(TAG, "Subiendo nueva imagen de portada");
             uploadImageToStorage(selectedCoverUri, url -> {
                 note.setCoverImageUrl(url);
                 saveToFirestore(user.getUid());
             });
         } else {
-            // Si no hay imagen nueva, guardar directamente
             saveToFirestore(user.getUid());
         }*/
         saveToFirestore(user.getUid());
     }
-
 
     // Guarda la nota en Firestore.
     private void saveToFirestore(String userId) {
         String noteId = note.getId();
 
         if (noteId == null || noteId.isEmpty()) {
-            // Crea nueva nota
             Log.d(TAG, "Creando nueva nota");
 
-            // Generar ID para la nota nueva
             String newNoteId = UUID.randomUUID().toString();
             note.setId(newNoteId);
             note.setCreatedAt(Timestamp.now());
 
-            // Guardar en Firestore
             db.collection("users")
                     .document(userId)
                     .collection("folders")
@@ -505,7 +583,6 @@ public class EditNoteActivity extends AppCompatActivity {
                     });
 
         } else {
-            // Actualiza nota existente
             Log.d(TAG, "Actualizando nota existente: " + noteId);
 
             db.collection("users")
@@ -528,7 +605,7 @@ public class EditNoteActivity extends AppCompatActivity {
         }
     }
 
-    // Interfaz para el callback de subida de imágenes (No func)
+    // Interfaz para el callback de subida de imágenes
     private interface OnUploadCompleteListener {
         void onUploadComplete(String url);
     }

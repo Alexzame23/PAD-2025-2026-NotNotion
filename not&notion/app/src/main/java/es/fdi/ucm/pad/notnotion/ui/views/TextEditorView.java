@@ -1,17 +1,25 @@
 package es.fdi.ucm.pad.notnotion.ui.views;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.text.Editable;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
+import android.text.TextPaint;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
+import android.text.style.AbsoluteSizeSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
-import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -62,8 +70,8 @@ public class TextEditorView extends LinearLayout {
         init(context);
     }
 
-    private void init(Context context) {
-        this.context = context;
+    private void init(Context ctx) {
+        this.context = ctx;
         setOrientation(VERTICAL);
         setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -88,12 +96,16 @@ public class TextEditorView extends LinearLayout {
         mainEditor.setTextSize(TypedValue.COMPLEX_UNIT_SP, currentTextSize);
         mainEditor.setHint("Escribe tu nota aquí...");
 
+        // Necesario para que ClickableSpans funcionen en EditText
+        mainEditor.setMovementMethod(LinkMovementMethod.getInstance());
+        mainEditor.setLinksClickable(true);
+
         mainEditor.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -201,17 +213,13 @@ public class TextEditorView extends LinearLayout {
 
         isUpdatingText = true;
 
-        // Para cada span activo, removerlo y recrearlo como EXCLUSIVE
         for (Object span : activeSpans) {
             int spanStart = editable.getSpanStart(span);
             int spanEnd = editable.getSpanEnd(span);
 
-            // Solo si el span está activo
             if (spanStart >= 0 && spanEnd >= 0) {
-                // Remover el span
                 editable.removeSpan(span);
 
-                // Recrear como EXCLUSIVE_EXCLUSIVE
                 if (span instanceof StyleSpan) {
                     StyleSpan styleSpan = (StyleSpan) span;
                     StyleSpan newSpan = new StyleSpan(styleSpan.getStyle());
@@ -230,9 +238,7 @@ public class TextEditorView extends LinearLayout {
             }
         }
 
-        // Limpiar la lista de spans activos
         activeSpans.clear();
-
         isUpdatingText = false;
 
         Log.d(TAG, "Spans cerrados en posición: " + currentPosition);
@@ -240,7 +246,6 @@ public class TextEditorView extends LinearLayout {
 
     // Cambia el estilo actual
     public void setCurrentTextStyle(int style) {
-        // Cerrar spans activos antes de cambiar de estilo
         closeActiveSpans();
 
         this.currentTextStyle = style;
@@ -251,7 +256,6 @@ public class TextEditorView extends LinearLayout {
 
     // Cambia el tamaño actual
     public void setCurrentTextSize(int size) {
-        // Cerrar spans activos antes de cambiar de tamaño
         closeActiveSpans();
 
         this.currentTextSize = size;
@@ -315,7 +319,6 @@ public class TextEditorView extends LinearLayout {
     // Aplica estilo a un bloque específico al cargar
     private void applyStyleToBlock(SpannableStringBuilder builder, int start, int end,
                                    int style, int size) {
-        // Al cargar, usar EXCLUSIVE_EXCLUSIVE para que no se extiendan
         if (size != 16) {
             builder.setSpan(new AbsoluteSizeSpan(size, true), start, end,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -591,6 +594,54 @@ public class TextEditorView extends LinearLayout {
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
+    }
+
+     // Inserta un bloque interactivo que muestra displayName y al hacer click
+     // abre el documento indicado por uriString usando el mimeType proporcionado.
+    public void addDocumentBlock(String displayName, String uriString, String mimeType) {
+        if (displayName == null) displayName = "documento";
+        if (uriString == null) return;
+        if (mimeType == null) mimeType = "*/*";
+
+        SpannableString spannable = new SpannableString(displayName);
+        final Uri uri = Uri.parse(uriString);
+        final String finalMime = mimeType;
+
+        ClickableSpan clickSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(uri, finalMime);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    Intent chooser = Intent.createChooser(intent, "Abrir documento");
+                    context.startActivity(chooser);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(context, "No hay aplicación para abrir este tipo de archivo.", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(context, "Error al abrir documento: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void updateDrawState(TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setUnderlineText(true);
+                ds.setColor(context.getResources().getColor(android.R.color.holo_blue_dark));
+            }
+        };
+
+        spannable.setSpan(clickSpan, 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        // Añadir con saltos de línea alrededor para mantener bloques separados
+        int startLen = mainEditor.getText().length();
+        mainEditor.append("\n");
+        mainEditor.append(spannable);
+        mainEditor.append("\n");
+
+        // Asegurar que el movementMethod esté establecido
+        mainEditor.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     // Métodos de compatibilidad

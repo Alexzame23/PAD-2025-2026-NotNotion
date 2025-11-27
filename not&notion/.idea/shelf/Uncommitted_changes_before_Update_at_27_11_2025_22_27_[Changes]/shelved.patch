@@ -1,0 +1,249 @@
+Index: app/src/main/java/es/fdi/ucm/pad/notnotion/ui/Fragments/EditNoteActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package es.fdi.ucm.pad.notnotion.ui.Fragments;\r\n\r\nimport android.app.AlertDialog;\r\nimport android.content.Intent;\r\nimport android.net.Uri;\r\nimport android.os.Bundle;\r\nimport android.provider.MediaStore;\r\nimport android.util.Log;\r\nimport android.view.View;\r\nimport android.widget.EditText;\r\nimport android.widget.FrameLayout;\r\nimport android.widget.ImageView;\r\nimport android.widget.PopupMenu;\r\nimport android.widget.TextView;\r\nimport android.widget.Toast;\r\n\r\nimport androidx.activity.result.ActivityResultLauncher;\r\nimport androidx.activity.result.contract.ActivityResultContracts;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport com.google.android.material.floatingactionbutton.FloatingActionButton;\r\nimport com.google.firebase.Timestamp;\r\nimport com.google.firebase.auth.FirebaseAuth;\r\nimport com.google.firebase.auth.FirebaseUser;\r\nimport com.google.firebase.firestore.FirebaseFirestore;\r\nimport com.google.firebase.firestore.SetOptions;\r\nimport com.google.firebase.storage.FirebaseStorage;\r\nimport com.google.firebase.storage.StorageReference;\r\nimport com.squareup.picasso.Picasso;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.UUID;\r\n\r\nimport es.fdi.ucm.pad.notnotion.R;\r\nimport es.fdi.ucm.pad.notnotion.data.firebase.NotesManager;\r\nimport es.fdi.ucm.pad.notnotion.data.model.ContentBlock;\r\nimport es.fdi.ucm.pad.notnotion.data.model.Note;\r\nimport es.fdi.ucm.pad.notnotion.ui.views.TextEditorView;\r\n\r\n// Activity encargada de editar notas comunicandose con MainActivity\r\n\r\npublic class EditNoteActivity extends AppCompatActivity {\r\n\r\n    private static final String TAG = \"EditNoteActivity\";\r\n\r\n    // Constantes para los extras del Intent\r\n    public static final String EXTRA_NOTE = \"extra_note\";\r\n    public static final String EXTRA_FOLDER_ID = \"extra_folder_id\";\r\n\r\n    // Componentes de la interfaz\r\n    private EditText etTitle;\r\n    private FrameLayout coverContainer;\r\n    private ImageView coverImage;\r\n    private TextView btnAddCover;\r\n    private TextEditorView textEditor;\r\n\r\n    // Botones de formato\r\n    private TextView btnBold;\r\n    private TextView btnItalic;\r\n    private FrameLayout btnUnderline;\r\n    private TextView btnTextSize;\r\n\r\n    // Botones de navegación\r\n    private FloatingActionButton btnBack;\r\n    private FloatingActionButton btnAddContent;\r\n\r\n    // Datos de la nota\r\n    private Note note;\r\n    private String folderId;\r\n    private Uri selectedCoverUri; // Imagen temporal de portada antes de subirla\r\n\r\n    // Estado de los botones de formato\r\n    private boolean isBoldActive = false;\r\n    private boolean isItalicActive = false;\r\n    private boolean isUnderlineActive = false;\r\n\r\n    // Firebase\r\n    private FirebaseFirestore db;\r\n    private FirebaseStorage storage;\r\n    private StorageReference storageRef;\r\n    private NotesManager notesManager;\r\n\r\n    // Lanzadores de actividad para seleccionar archivos\r\n    private ActivityResultLauncher<Intent> pickCoverLauncher;\r\n    private ActivityResultLauncher<Intent> pickContentImageLauncher;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.edit_note);\r\n\r\n        Log.d(TAG, \"EditNoteActivity iniciada\");\r\n\r\n        // Inicializar Firebase\r\n        db = FirebaseFirestore.getInstance();\r\n        storage = FirebaseStorage.getInstance();\r\n        storageRef = storage.getReference();\r\n        notesManager = new NotesManager();\r\n\r\n        // Obtener datos del Intent\r\n        // MainActivity nos pasa la nota y el ID de carpeta por aquí\r\n        if (!loadIntentData()) {\r\n            // Si no pudimos cargar los datos, algo salió mal\r\n            Toast.makeText(this, \"Error: datos incompletos\", Toast.LENGTH_SHORT).show();\r\n            finish(); // Cerrar esta Activity y volver a MainActivity\r\n            return;\r\n        }\r\n\r\n        // Inicializar vistas\r\n        initializeViews();\r\n\r\n        // Configurar lanzadores de archivos\r\n        setupActivityLaunchers();\r\n\r\n        // Cargar datos de la nota en la interfaz\r\n        loadNoteData();\r\n\r\n        // Configurar listeners de los botones\r\n        setupListeners();\r\n    }\r\n\r\n\r\n     // Carga los datos que MainActivity nos pasó mediante el Intent.\r\n    private boolean loadIntentData() {\r\n        Intent intent = getIntent();\r\n\r\n        // Intentar obtener la nota del Intent\r\n        note = (Note) intent.getSerializableExtra(EXTRA_NOTE);\r\n        folderId = intent.getStringExtra(EXTRA_FOLDER_ID);\r\n\r\n        // Si no hay nota, crear una nueva vacía\r\n        if (note == null) {\r\n            Log.d(TAG, \"No se recibió nota, creando una nueva\");\r\n            note = new Note();\r\n            note.setContentBlocks(new ArrayList<>());\r\n        }\r\n\r\n        // folderId para saber dónde guardar\r\n        if (folderId == null || folderId.isEmpty()) {\r\n            Log.e(TAG, \"No se recibió folderId\");\r\n            return false;\r\n        }\r\n\r\n        return true;\r\n    }\r\n\r\n\r\n    // Inicializa todas las referencias a las vistas del layout.\r\n    private void initializeViews() {\r\n        // Componentes principales\r\n        etTitle = findViewById(R.id.etTitle);\r\n        coverContainer = findViewById(R.id.coverContainer);\r\n        coverImage = findViewById(R.id.coverImage);\r\n        btnAddCover = findViewById(R.id.btnAddCover);\r\n        textEditor = findViewById(R.id.richEditor);\r\n\r\n        // Botones de formato\r\n        btnBold = findViewById(R.id.btnBold);\r\n        btnItalic = findViewById(R.id.btnItalic);\r\n        btnUnderline = findViewById(R.id.btnUnderline);\r\n        btnTextSize = findViewById(R.id.btnTextSize);\r\n\r\n        // Botones de navegación\r\n        btnBack = findViewById(R.id.btnBack);\r\n        btnAddContent = findViewById(R.id.btnAddContent);\r\n    }\r\n\r\n\r\n    // Configura los lanzadores para seleccionar archivos (No funciona)\r\n    private void setupActivityLaunchers() {\r\n        // Lanzador para seleccionar imagen de portada\r\n        pickCoverLauncher = registerForActivityResult(\r\n                new ActivityResultContracts.StartActivityForResult(),\r\n                result -> {\r\n                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {\r\n                        selectedCoverUri = result.getData().getData();\r\n\r\n                        // Mostrar la imagen inmediatamente en la interfaz\r\n                        coverImage.setVisibility(View.VISIBLE);\r\n                        btnAddCover.setVisibility(View.GONE);\r\n\r\n                        Picasso.get()\r\n                                .load(selectedCoverUri)\r\n                                .placeholder(R.drawable.icon_note)\r\n                                .error(R.drawable.icon_note)\r\n                                .into(coverImage);\r\n\r\n                        Log.d(TAG, \"Imagen de portada seleccionada: \" + selectedCoverUri);\r\n                    }\r\n                }\r\n        );\r\n\r\n        // Lanzador para añadir imágenes al contenido\r\n        pickContentImageLauncher = registerForActivityResult(\r\n                new ActivityResultContracts.StartActivityForResult(),\r\n                result -> {\r\n                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {\r\n                        Uri imageUri = result.getData().getData();\r\n\r\n                        Log.d(TAG, \"Imagen de contenido seleccionada, subiendo...\");\r\n\r\n                        // Subir la imagen a Firebase Storage\r\n                        uploadImageToStorage(imageUri, url -> {\r\n                            // Una vez subida, añadir el bloque al editor\r\n                            textEditor.addImageBlock(url);\r\n                            Toast.makeText(this, \"Imagen añadida\", Toast.LENGTH_SHORT).show();\r\n                            Log.d(TAG, \"Imagen subida y añadida al editor: \" + url);\r\n                        });\r\n                    }\r\n                }\r\n        );\r\n    }\r\n\r\n\r\n    // Carga los datos de la nota en la interfaz\r\n    private void loadNoteData() {\r\n        // Cargar título\r\n        if (note.getTitle() != null) {\r\n            etTitle.setText(note.getTitle());\r\n        }\r\n\r\n        // Cargar imagen de portada si existe\r\n        if (note.getCoverImageUrl() != null && !note.getCoverImageUrl().isEmpty()) {\r\n            coverImage.setVisibility(View.VISIBLE);\r\n            btnAddCover.setVisibility(View.GONE);\r\n\r\n            Picasso.get()\r\n                    .load(note.getCoverImageUrl())\r\n                    .placeholder(R.drawable.icon_note)\r\n                    .error(R.drawable.icon_note)\r\n                    .into(coverImage);\r\n        }\r\n\r\n        // Cargar contenido en el editor\r\n        if (note.getContentBlocks() != null && !note.getContentBlocks().isEmpty()) {\r\n            textEditor.loadContent(note.getContentBlocks());\r\n        } else {\r\n            textEditor.loadContent(new ArrayList<>());\r\n        }\r\n    }\r\n\r\n    // Configura todos los listeners de los botones.\r\n    private void setupListeners() {\r\n\r\n        // IMAGEN DE PORTADA(No func)\r\n        coverContainer.setOnClickListener(v -> {\r\n            Intent intent = new Intent(Intent.ACTION_PICK,\r\n                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);\r\n            pickCoverLauncher.launch(intent);\r\n        });\r\n\r\n\r\n        // Botones de estilos\r\n        btnBold.setOnClickListener(v -> {\r\n            isBoldActive = !isBoldActive;\r\n            updateButtonState(btnBold, isBoldActive);\r\n            updateTextStyle();\r\n            Log.d(TAG, \"Bold toggled: \" + isBoldActive);\r\n        });\r\n\r\n        btnItalic.setOnClickListener(v -> {\r\n            isItalicActive = !isItalicActive;\r\n            updateButtonState(btnItalic, isItalicActive);\r\n            updateTextStyle();\r\n            Log.d(TAG, \"Italic toggled: \" + isItalicActive);\r\n        });\r\n\r\n        btnUnderline.setOnClickListener(v -> {\r\n            isUnderlineActive = !isUnderlineActive;\r\n\r\n            if (isUnderlineActive) {\r\n                btnUnderline.setBackgroundColor(getResources().getColor(R.color.light_yellow));\r\n            } else {\r\n                btnUnderline.setBackgroundColor(getResources().getColor(android.R.color.transparent));\r\n            }\r\n\r\n            updateTextStyle();\r\n            Log.d(TAG, \"Underline toggled: \" + isUnderlineActive);\r\n        });\r\n\r\n        btnTextSize.setOnClickListener(v -> showTextSizeDialog());\r\n\r\n\r\n        // Boton para añadir contenido\r\n        btnAddContent.setOnClickListener(v -> {\r\n            PopupMenu popup = new PopupMenu(this, btnAddContent);\r\n            popup.getMenu().add(0, 1, 0, \"Añadir imagen\");\r\n\r\n            popup.setOnMenuItemClickListener(item -> {\r\n                if (item.getItemId() == 1) {\r\n                    Intent intent = new Intent(Intent.ACTION_PICK,\r\n                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI);\r\n                    pickContentImageLauncher.launch(intent);\r\n                    return true;\r\n                }\r\n                return false;\r\n            });\r\n\r\n            popup.show();\r\n        });\r\n\r\n\r\n        // Boton volver\r\n        btnBack.setOnClickListener(v -> {\r\n            saveNoteAndFinish();\r\n        });\r\n    }\r\n\r\n    // Actualiza el estilo del texto según los botones activos\r\n    private void updateTextStyle() {\r\n        int style = ContentBlock.STYLE_NORMAL;\r\n\r\n        // Determinar el estilo basándose en las combinaciones activas\r\n        if (isBoldActive && isItalicActive && isUnderlineActive) {\r\n            style = ContentBlock.STYLE_BOLD_ITALIC_UNDERLINE;\r\n        } else if (isBoldActive && isItalicActive) {\r\n            style = ContentBlock.STYLE_BOLD_ITALIC;\r\n        } else if (isBoldActive && isUnderlineActive) {\r\n            style = ContentBlock.STYLE_BOLD_UNDERLINE;\r\n        } else if (isItalicActive && isUnderlineActive) {\r\n            style = ContentBlock.STYLE_ITALIC_UNDERLINE;\r\n        } else if (isBoldActive) {\r\n            style = ContentBlock.STYLE_BOLD;\r\n        } else if (isItalicActive) {\r\n            style = ContentBlock.STYLE_ITALIC;\r\n        } else if (isUnderlineActive) {\r\n            style = ContentBlock.STYLE_UNDERLINE;\r\n        }\r\n\r\n        textEditor.setCurrentTextStyle(style);\r\n    }\r\n\r\n    // Actualiza visualmente el estado de un botón de formato\r\n    private void updateButtonState(TextView button, boolean active) {\r\n        if (active) {\r\n            button.setBackgroundColor(getResources().getColor(R.color.light_yellow));\r\n        } else {\r\n            button.setBackgroundColor(getResources().getColor(android.R.color.transparent));\r\n        }\r\n    }\r\n\r\n\r\n    // Muestra un diálogo para seleccionar el tamaño del texto\r\n    private void showTextSizeDialog() {\r\n        String[] sizes = {\"12sp\", \"14sp\", \"16sp\", \"18sp\", \"20sp\", \"24sp\", \"28sp\", \"32sp\"};\r\n        int[] sizeValues = {12, 14, 16, 18, 20, 24, 28, 32};\r\n\r\n        new AlertDialog.Builder(this)\r\n                .setTitle(\"Tamaño de texto\")\r\n                .setItems(sizes, (dialog, which) -> {\r\n                    textEditor.setCurrentTextSize(sizeValues[which]);\r\n                    btnTextSize.setText(sizes[which]);\r\n                    Log.d(TAG, \"Tamaño de texto cambiado a: \" + sizes[which]);\r\n                })\r\n                .show();\r\n    }\r\n\r\n    // Sube una imagen a Firebase Storage y devuelve la URL mediante un callback (No func)\r\n    private void uploadImageToStorage(Uri imageUri, OnUploadCompleteListener listener) {\r\n        // Generar un nombre único para la imagen\r\n        String filename = \"images/\" + UUID.randomUUID().toString() + \".jpg\";\r\n        StorageReference imageRef = storageRef.child(filename);\r\n\r\n        Log.d(TAG, \"Iniciando subida de imagen: \" + filename);\r\n\r\n        // Subir el archivo\r\n        imageRef.putFile(imageUri)\r\n                .addOnSuccessListener(taskSnapshot -> {\r\n                    Log.d(TAG, \"Imagen subida exitosamente\");\r\n\r\n                    // Obtener la URL de descarga\r\n                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {\r\n                        Log.d(TAG, \"URL de imagen obtenida: \" + uri.toString());\r\n                        listener.onUploadComplete(uri.toString());\r\n                    });\r\n                })\r\n                .addOnFailureListener(e -> {\r\n                    Log.e(TAG, \"Error al subir imagen\", e);\r\n                    Toast.makeText(this, \"Error al subir imagen: \" + e.getMessage(),\r\n                            Toast.LENGTH_SHORT).show();\r\n                });\r\n    }\r\n\r\n\r\n    // Guarda la nota y cierra la Activity\r\n    private void saveNoteAndFinish() {\r\n        Log.d(TAG, \"Iniciando guardado de nota\");\r\n\r\n        // Verificar que hay un usuario autenticado\r\n        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();\r\n        if (user == null) {\r\n            Toast.makeText(this, \"Error: usuario no logueado\", Toast.LENGTH_SHORT).show();\r\n            finish();\r\n            return;\r\n        }\r\n\r\n        // Validar que hay un título\r\n        String title = etTitle.getText().toString().trim();\r\n        if (title.isEmpty()) {\r\n            Toast.makeText(this, \"El título es obligatorio\", Toast.LENGTH_SHORT).show();\r\n            etTitle.requestFocus(); // Poner el cursor en el campo de título\r\n            return;\r\n        }\r\n\r\n        // Actualizar los datos de la nota\r\n        note.setTitle(title);\r\n        note.setContentBlocks(textEditor.getContentBlocks());\r\n        note.setFolderId(folderId);\r\n        note.setUpdatedAt(Timestamp.now());\r\n\r\n        // Si hay una nueva imagen de portada, subirla primero\r\n        if (selectedCoverUri != null) {\r\n            Log.d(TAG, \"Subiendo nueva imagen de portada\");\r\n            uploadImageToStorage(selectedCoverUri, url -> {\r\n                note.setCoverImageUrl(url);\r\n                saveToFirestore(user.getUid());\r\n            });\r\n        } else {\r\n            // Si no hay imagen nueva, guardar directamente\r\n            saveToFirestore(user.getUid());\r\n        }\r\n    }\r\n\r\n\r\n    // Guarda la nota en Firestore.\r\n    private void saveToFirestore(String userId) {\r\n        String noteId = note.getId();\r\n\r\n        if (noteId == null || noteId.isEmpty()) {\r\n            // Crea nueva nota\r\n            Log.d(TAG, \"Creando nueva nota\");\r\n\r\n            // Generar ID para la nota nueva\r\n            String newNoteId = UUID.randomUUID().toString();\r\n            note.setId(newNoteId);\r\n            note.setCreatedAt(Timestamp.now());\r\n\r\n            // Guardar en Firestore\r\n            db.collection(\"users\")\r\n                    .document(userId)\r\n                    .collection(\"folders\")\r\n                    .document(folderId)\r\n                    .collection(\"notes\")\r\n                    .document(newNoteId)\r\n                    .set(note)\r\n                    .addOnSuccessListener(aVoid -> {\r\n                        Log.d(TAG, \"Nota creada exitosamente: \" + note.getId());\r\n                        Toast.makeText(this, \"Nota creada\", Toast.LENGTH_SHORT).show();\r\n                        finish();\r\n                    })\r\n                    .addOnFailureListener(e -> {\r\n                        Log.e(TAG, \"Error al crear nota\", e);\r\n                        Toast.makeText(this, \"Error al crear nota: \" + e.getMessage(),\r\n                                Toast.LENGTH_SHORT).show();\r\n                    });\r\n\r\n        } else {\r\n            // Actualiza nota existente\r\n            Log.d(TAG, \"Actualizando nota existente: \" + noteId);\r\n\r\n            db.collection(\"users\")\r\n                    .document(userId)\r\n                    .collection(\"folders\")\r\n                    .document(folderId)\r\n                    .collection(\"notes\")\r\n                    .document(noteId)\r\n                    .set(note, SetOptions.merge())\r\n                    .addOnSuccessListener(aVoid -> {\r\n                        Log.d(TAG, \"Nota actualizada exitosamente\");\r\n                        Toast.makeText(this, \"Nota guardada\", Toast.LENGTH_SHORT).show();\r\n                        finish();\r\n                    })\r\n                    .addOnFailureListener(e -> {\r\n                        Log.e(TAG, \"Error al guardar nota\", e);\r\n                        Toast.makeText(this, \"Error al guardar: \" + e.getMessage(),\r\n                                Toast.LENGTH_SHORT).show();\r\n                    });\r\n        }\r\n    }\r\n\r\n    // Interfaz para el callback de subida de imágenes (No func)\r\n    private interface OnUploadCompleteListener {\r\n        void onUploadComplete(String url);\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/Fragments/EditNoteActivity.java b/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/Fragments/EditNoteActivity.java
+--- a/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/Fragments/EditNoteActivity.java	(revision ed51ee549a62dbef0767d3cc5ca6d7df9c9d397b)
++++ b/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/Fragments/EditNoteActivity.java	(date 1764278789524)
+@@ -2,9 +2,11 @@
+ 
+ import android.app.AlertDialog;
+ import android.content.Intent;
++import android.database.Cursor;
+ import android.net.Uri;
+ import android.os.Bundle;
+ import android.provider.MediaStore;
++import android.provider.OpenableColumns;
+ import android.util.Log;
+ import android.view.View;
+ import android.widget.EditText;
+@@ -83,6 +85,7 @@
+     // Lanzadores de actividad para seleccionar archivos
+     private ActivityResultLauncher<Intent> pickCoverLauncher;
+     private ActivityResultLauncher<Intent> pickContentImageLauncher;
++    private ActivityResultLauncher<Intent> pickDocumentLauncher;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+@@ -209,6 +212,39 @@
+                     }
+                 }
+         );
++
++        // Lanzador para añadir documentos al contenido
++        pickDocumentLauncher = registerForActivityResult(
++                new ActivityResultContracts.StartActivityForResult(),
++                result -> {
++                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
++                        Uri documentUri = result.getData().getData();
++
++                        Log.d(TAG, "Documento seleccionado: " + documentUri);
++
++                        handleDocumentSelected(documentUri);
++                    }
++                }
++        );
++    }
++
++    private void handleDocumentSelected(Uri uri) {
++        if (uri == null) return;
++
++        String name = getFileName(uri);
++        textEditor.addDocumentBlock(name, uri.toString());
++    }
++
++    private String getFileName(Uri uri) {
++        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
++        if (cursor != null) {
++            int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
++            cursor.moveToFirst();
++            String name = cursor.getString(index);
++            cursor.close();
++            return name;
++        }
++        return "archivo";
+     }
+ 
+ 
+@@ -284,14 +320,22 @@
+         // Boton para añadir contenido
+         btnAddContent.setOnClickListener(v -> {
+             PopupMenu popup = new PopupMenu(this, btnAddContent);
++
+             popup.getMenu().add(0, 1, 0, "Añadir imagen");
++            popup.getMenu().add(0, 2, 1, "Añadir documento"); // ← NUEVO
+ 
+             popup.setOnMenuItemClickListener(item -> {
+-                if (item.getItemId() == 1) {
+-                    Intent intent = new Intent(Intent.ACTION_PICK,
+-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+-                    pickContentImageLauncher.launch(intent);
+-                    return true;
++                switch (item.getItemId()) {
++
++                    case 1: // Añadir imagen
++                        Intent imgIntent = new Intent(Intent.ACTION_PICK,
++                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
++                        pickContentImageLauncher.launch(imgIntent);
++                        return true;
++
++                    case 2: // Añadir documento
++                        openDocumentPicker();  // NUEVO
++                        return true;
+                 }
+                 return false;
+             });
+@@ -478,6 +522,19 @@
+         }
+     }
+ 
++    // Para seleccionar un documento en el movil
++    private void openDocumentPicker() {
++        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
++        intent.setType("*/*");
++        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
++                "application/pdf",
++                "application/msword",
++                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
++        });
++        intent.addCategory(Intent.CATEGORY_OPENABLE);
++        pickDocumentLauncher.launch(intent);
++    }
++
+     // Interfaz para el callback de subida de imágenes (No func)
+     private interface OnUploadCompleteListener {
+         void onUploadComplete(String url);
+Index: app/src/main/java/es/fdi/ucm/pad/notnotion/ui/views/TextEditorView.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package es.fdi.ucm.pad.notnotion.ui.views;\r\n\r\nimport android.content.Context;\r\nimport android.graphics.Typeface;\r\nimport android.text.Editable;\r\nimport android.text.Spannable;\r\nimport android.text.SpannableStringBuilder;\r\nimport android.text.TextWatcher;\r\nimport android.text.style.StyleSpan;\r\nimport android.text.style.UnderlineSpan;\r\nimport android.text.style.AbsoluteSizeSpan;\r\nimport android.util.AttributeSet;\r\nimport android.util.Log;\r\nimport android.util.TypedValue;\r\nimport android.view.ViewGroup;\r\nimport android.widget.EditText;\r\nimport android.widget.LinearLayout;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\n\r\nimport es.fdi.ucm.pad.notnotion.R;\r\nimport es.fdi.ucm.pad.notnotion.data.model.ContentBlock;\r\n\r\n// Vista para el editor de texto, splannable para aplicar en el momento\r\npublic class TextEditorView extends LinearLayout {\r\n\r\n    private static final String TAG = \"TextEditorView\";\r\n\r\n    private Context context;\r\n    private EditText mainEditor;\r\n\r\n    // Estado del estilo actual\r\n    private int currentTextStyle = ContentBlock.STYLE_NORMAL;\r\n    private int currentTextSize = 16;\r\n\r\n    // Posición donde empezó el estilo actual\r\n    private int styleStartPosition = 0;\r\n\r\n    // Flag para evitar bucles infinitos\r\n    private boolean isUpdatingText = false;\r\n\r\n    // Rastrear spans activos que se están extendiendo\r\n    private List<Object> activeSpans = new ArrayList<>();\r\n\r\n    public TextEditorView(Context context) {\r\n        super(context);\r\n        init(context);\r\n    }\r\n\r\n    public TextEditorView(Context context, AttributeSet attrs) {\r\n        super(context, attrs);\r\n        init(context);\r\n    }\r\n\r\n    private void init(Context context) {\r\n        this.context = context;\r\n        setOrientation(VERTICAL);\r\n        setLayoutParams(new LinearLayout.LayoutParams(\r\n                ViewGroup.LayoutParams.MATCH_PARENT,\r\n                ViewGroup.LayoutParams.WRAP_CONTENT\r\n        ));\r\n\r\n        createMainEditor();\r\n    }\r\n\r\n    private void createMainEditor() {\r\n        mainEditor = new EditText(context);\r\n        mainEditor.setLayoutParams(new LinearLayout.LayoutParams(\r\n                ViewGroup.LayoutParams.MATCH_PARENT,\r\n                ViewGroup.LayoutParams.WRAP_CONTENT\r\n        ));\r\n        mainEditor.setBackground(null);\r\n        mainEditor.setTextColor(context.getResources().getColor(R.color.black));\r\n        mainEditor.setTextSize(TypedValue.COMPLEX_UNIT_SP, currentTextSize);\r\n        mainEditor.setHint(\"Escribe tu nota aquí...\");\r\n\r\n        mainEditor.addTextChangedListener(new TextWatcher() {\r\n            @Override\r\n            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}\r\n\r\n            @Override\r\n            public void onTextChanged(CharSequence s, int start, int before, int count) {}\r\n\r\n            @Override\r\n            public void afterTextChanged(Editable editable) {\r\n                if (isUpdatingText) {\r\n                    return;\r\n                }\r\n\r\n                int currentPosition = mainEditor.getSelectionStart();\r\n\r\n                if (currentPosition > styleStartPosition) {\r\n                    applyStyleToRange(editable, styleStartPosition, currentPosition);\r\n                }\r\n            }\r\n        });\r\n\r\n        addView(mainEditor);\r\n    }\r\n\r\n    // Aplica el estilo actual a un rango de texto\r\n    private void applyStyleToRange(Editable editable, int start, int end) {\r\n        if (start >= end || start < 0 || end > editable.length()) {\r\n            return;\r\n        }\r\n\r\n        isUpdatingText = true;\r\n\r\n        // NO limpiar spans - solo extender los activos\r\n        applyCurrentStyle(editable, start, end);\r\n\r\n        isUpdatingText = false;\r\n    }\r\n\r\n    // Aplica el estilo actual al rango especificadp\r\n    private void applyCurrentStyle(Editable editable, int start, int end) {\r\n        // Aplicar tamaño\r\n        if (currentTextSize != 16) {\r\n            AbsoluteSizeSpan sizeSpan = new AbsoluteSizeSpan(currentTextSize, true);\r\n            editable.setSpan(sizeSpan, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n            activeSpans.add(sizeSpan);\r\n        }\r\n\r\n        // Aplicar estilos de texto\r\n        switch (currentTextStyle) {\r\n            case ContentBlock.STYLE_BOLD:\r\n                StyleSpan boldSpan = new StyleSpan(Typeface.BOLD);\r\n                editable.setSpan(boldSpan, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                activeSpans.add(boldSpan);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_ITALIC:\r\n                StyleSpan italicSpan = new StyleSpan(Typeface.ITALIC);\r\n                editable.setSpan(italicSpan, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                activeSpans.add(italicSpan);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_BOLD_ITALIC:\r\n                StyleSpan boldItalicSpan = new StyleSpan(Typeface.BOLD_ITALIC);\r\n                editable.setSpan(boldItalicSpan, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                activeSpans.add(boldItalicSpan);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_UNDERLINE:\r\n                UnderlineSpan underlineSpan = new UnderlineSpan();\r\n                editable.setSpan(underlineSpan, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                activeSpans.add(underlineSpan);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_BOLD_UNDERLINE:\r\n                StyleSpan boldSpan2 = new StyleSpan(Typeface.BOLD);\r\n                UnderlineSpan underlineSpan2 = new UnderlineSpan();\r\n                editable.setSpan(boldSpan2, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                editable.setSpan(underlineSpan2, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                activeSpans.add(boldSpan2);\r\n                activeSpans.add(underlineSpan2);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_ITALIC_UNDERLINE:\r\n                StyleSpan italicSpan2 = new StyleSpan(Typeface.ITALIC);\r\n                UnderlineSpan underlineSpan3 = new UnderlineSpan();\r\n                editable.setSpan(italicSpan2, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                editable.setSpan(underlineSpan3, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                activeSpans.add(italicSpan2);\r\n                activeSpans.add(underlineSpan3);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_BOLD_ITALIC_UNDERLINE:\r\n                StyleSpan boldItalicSpan2 = new StyleSpan(Typeface.BOLD_ITALIC);\r\n                UnderlineSpan underlineSpan4 = new UnderlineSpan();\r\n                editable.setSpan(boldItalicSpan2, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                editable.setSpan(underlineSpan4, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);\r\n                activeSpans.add(boldItalicSpan2);\r\n                activeSpans.add(underlineSpan4);\r\n                break;\r\n        }\r\n    }\r\n\r\n    // Cierra los spans activos convirtiéndolos de INCLUSIVE a EXCLUSIVE\r\n    private void closeActiveSpans() {\r\n        if (activeSpans.isEmpty()) {\r\n            return;\r\n        }\r\n\r\n        Editable editable = mainEditor.getText();\r\n        int currentPosition = mainEditor.getSelectionStart();\r\n\r\n        isUpdatingText = true;\r\n\r\n        // Para cada span activo, removerlo y recrearlo como EXCLUSIVE\r\n        for (Object span : activeSpans) {\r\n            int spanStart = editable.getSpanStart(span);\r\n            int spanEnd = editable.getSpanEnd(span);\r\n\r\n            // Solo si el span está activo\r\n            if (spanStart >= 0 && spanEnd >= 0) {\r\n                // Remover el span\r\n                editable.removeSpan(span);\r\n\r\n                // Recrear como EXCLUSIVE_EXCLUSIVE\r\n                if (span instanceof StyleSpan) {\r\n                    StyleSpan styleSpan = (StyleSpan) span;\r\n                    StyleSpan newSpan = new StyleSpan(styleSpan.getStyle());\r\n                    editable.setSpan(newSpan, spanStart, currentPosition,\r\n                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                } else if (span instanceof UnderlineSpan) {\r\n                    UnderlineSpan newSpan = new UnderlineSpan();\r\n                    editable.setSpan(newSpan, spanStart, currentPosition,\r\n                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                } else if (span instanceof AbsoluteSizeSpan) {\r\n                    AbsoluteSizeSpan oldSpan = (AbsoluteSizeSpan) span;\r\n                    AbsoluteSizeSpan newSpan = new AbsoluteSizeSpan(oldSpan.getSize(), true);\r\n                    editable.setSpan(newSpan, spanStart, currentPosition,\r\n                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                }\r\n            }\r\n        }\r\n\r\n        // Limpiar la lista de spans activos\r\n        activeSpans.clear();\r\n\r\n        isUpdatingText = false;\r\n\r\n        Log.d(TAG, \"Spans cerrados en posición: \" + currentPosition);\r\n    }\r\n\r\n    // Cambia el estilo actual\r\n    public void setCurrentTextStyle(int style) {\r\n        // Cerrar spans activos antes de cambiar de estilo\r\n        closeActiveSpans();\r\n\r\n        this.currentTextStyle = style;\r\n        this.styleStartPosition = mainEditor.getSelectionStart();\r\n\r\n        Log.d(TAG, \"Estilo cambiado a: \" + style + \" en posición: \" + styleStartPosition);\r\n    }\r\n\r\n    // Cambia el tamaño actual\r\n    public void setCurrentTextSize(int size) {\r\n        // Cerrar spans activos antes de cambiar de tamaño\r\n        closeActiveSpans();\r\n\r\n        this.currentTextSize = size;\r\n        this.styleStartPosition = mainEditor.getSelectionStart();\r\n\r\n        Log.d(TAG, \"Tamaño cambiado a: \" + size + \" en posición: \" + styleStartPosition);\r\n    }\r\n\r\n    public int getCurrentTextStyle() {\r\n        return currentTextStyle;\r\n    }\r\n\r\n    public int getCurrentTextSize() {\r\n        return currentTextSize;\r\n    }\r\n\r\n    // Carga contenido desde una lista de bloques\r\n    public void loadContent(List<ContentBlock> blocks) {\r\n        if (blocks == null || blocks.isEmpty()) {\r\n            mainEditor.setText(\"\");\r\n            return;\r\n        }\r\n\r\n        SpannableStringBuilder builder = new SpannableStringBuilder();\r\n\r\n        for (ContentBlock block : blocks) {\r\n            if (block.getType() == ContentBlock.TYPE_TEXT) {\r\n                String text = block.getTextContent();\r\n                if (text == null || text.isEmpty()) {\r\n                    continue;\r\n                }\r\n\r\n                int start = builder.length();\r\n                builder.append(text);\r\n                int end = builder.length();\r\n\r\n                applyStyleToBlock(builder, start, end, block.getTextStyle(), block.getTextSize());\r\n            }\r\n        }\r\n\r\n        isUpdatingText = true;\r\n        mainEditor.setText(builder);\r\n        mainEditor.setSelection(mainEditor.getText().length());\r\n        isUpdatingText = false;\r\n    }\r\n\r\n    // Aplica estilo a un bloque específico al cargar\r\n    private void applyStyleToBlock(SpannableStringBuilder builder, int start, int end,\r\n                                   int style, int size) {\r\n        // Al cargar, usar EXCLUSIVE_EXCLUSIVE para que no se extiendan\r\n        if (size != 16) {\r\n            builder.setSpan(new AbsoluteSizeSpan(size, true), start, end,\r\n                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n        }\r\n\r\n        switch (style) {\r\n            case ContentBlock.STYLE_BOLD:\r\n                builder.setSpan(new StyleSpan(Typeface.BOLD), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_ITALIC:\r\n                builder.setSpan(new StyleSpan(Typeface.ITALIC), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_BOLD_ITALIC:\r\n                builder.setSpan(new StyleSpan(Typeface.BOLD_ITALIC), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_UNDERLINE:\r\n                builder.setSpan(new UnderlineSpan(), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_BOLD_UNDERLINE:\r\n                builder.setSpan(new StyleSpan(Typeface.BOLD), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                builder.setSpan(new UnderlineSpan(), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_ITALIC_UNDERLINE:\r\n                builder.setSpan(new StyleSpan(Typeface.ITALIC), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                builder.setSpan(new UnderlineSpan(), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                break;\r\n\r\n            case ContentBlock.STYLE_BOLD_ITALIC_UNDERLINE:\r\n                builder.setSpan(new StyleSpan(Typeface.BOLD_ITALIC), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                builder.setSpan(new UnderlineSpan(), start, end,\r\n                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);\r\n                break;\r\n        }\r\n    }\r\n\r\n    // Obtiene el contenido como lista de bloques\r\n    public List<ContentBlock> getContentBlocks() {\r\n        List<ContentBlock> blocks = new ArrayList<>();\r\n\r\n        Editable editable = mainEditor.getText();\r\n        String text = editable.toString();\r\n\r\n        if (text.trim().isEmpty()) {\r\n            return blocks;\r\n        }\r\n\r\n        int length = text.length();\r\n        int currentPos = 0;\r\n\r\n        while (currentPos < length) {\r\n            int nextChange = findNextStyleChange(editable, currentPos);\r\n            String segmentText = text.substring(currentPos, nextChange);\r\n            int style = getStyleAtPosition(editable, currentPos);\r\n            int size = getSizeAtPosition(editable, currentPos);\r\n\r\n            if (!segmentText.isEmpty()) {\r\n                blocks.add(ContentBlock.createTextBlock(segmentText, style, size));\r\n                Log.d(TAG, \"Bloque guardado: '\" + segmentText + \"' estilo=\" + style + \" tamaño=\" + size);\r\n            }\r\n\r\n            currentPos = nextChange;\r\n        }\r\n\r\n        Log.d(TAG, \"Total bloques guardados: \" + blocks.size());\r\n        return blocks;\r\n    }\r\n\r\n    private int findNextStyleChange(Editable editable, int start) {\r\n        int length = editable.length();\r\n        Object[] spans = editable.getSpans(start, length, Object.class);\r\n\r\n        int nearestChange = length;\r\n\r\n        for (Object span : spans) {\r\n            int spanStart = editable.getSpanStart(span);\r\n            int spanEnd = editable.getSpanEnd(span);\r\n\r\n            if (spanStart > start && spanStart < nearestChange) {\r\n                nearestChange = spanStart;\r\n            }\r\n\r\n            if (spanEnd > start && spanEnd < nearestChange) {\r\n                nearestChange = spanEnd;\r\n            }\r\n        }\r\n\r\n        return nearestChange;\r\n    }\r\n\r\n    private int getStyleAtPosition(Editable editable, int position) {\r\n        if (position >= editable.length()) {\r\n            return ContentBlock.STYLE_NORMAL;\r\n        }\r\n\r\n        StyleSpan[] styleSpans = editable.getSpans(position, position + 1, StyleSpan.class);\r\n        UnderlineSpan[] underlineSpans = editable.getSpans(position, position + 1, UnderlineSpan.class);\r\n\r\n        boolean isBold = false;\r\n        boolean isItalic = false;\r\n        boolean isUnderline = underlineSpans.length > 0;\r\n\r\n        for (StyleSpan span : styleSpans) {\r\n            int style = span.getStyle();\r\n            if (style == Typeface.BOLD) {\r\n                isBold = true;\r\n            } else if (style == Typeface.ITALIC) {\r\n                isItalic = true;\r\n            } else if (style == Typeface.BOLD_ITALIC) {\r\n                isBold = true;\r\n                isItalic = true;\r\n            }\r\n        }\r\n\r\n        if (isBold && isItalic && isUnderline) {\r\n            return ContentBlock.STYLE_BOLD_ITALIC_UNDERLINE;\r\n        } else if (isBold && isItalic) {\r\n            return ContentBlock.STYLE_BOLD_ITALIC;\r\n        } else if (isBold && isUnderline) {\r\n            return ContentBlock.STYLE_BOLD_UNDERLINE;\r\n        } else if (isItalic && isUnderline) {\r\n            return ContentBlock.STYLE_ITALIC_UNDERLINE;\r\n        } else if (isBold) {\r\n            return ContentBlock.STYLE_BOLD;\r\n        } else if (isItalic) {\r\n            return ContentBlock.STYLE_ITALIC;\r\n        } else if (isUnderline) {\r\n            return ContentBlock.STYLE_UNDERLINE;\r\n        } else {\r\n            return ContentBlock.STYLE_NORMAL;\r\n        }\r\n    }\r\n\r\n    private int getSizeAtPosition(Editable editable, int position) {\r\n        if (position >= editable.length()) {\r\n            return 16;\r\n        }\r\n\r\n        AbsoluteSizeSpan[] sizeSpans = editable.getSpans(position, position + 1, AbsoluteSizeSpan.class);\r\n\r\n        if (sizeSpans.length > 0) {\r\n            return sizeSpans[0].getSize();\r\n        }\r\n\r\n        return 16;\r\n    }\r\n\r\n    public void addImageBlock(String imageUrl) {\r\n        mainEditor.append(\"\\n[Imagen: \" + imageUrl + \"]\\n\");\r\n    }\r\n\r\n    // Métodos de compatibilidad\r\n    public void changeStyleAndCreateNewBlock(int style) {\r\n        setCurrentTextStyle(style);\r\n    }\r\n\r\n    public void changeSizeAndCreateNewBlock(int size) {\r\n        setCurrentTextSize(size);\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/views/TextEditorView.java b/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/views/TextEditorView.java
+--- a/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/views/TextEditorView.java	(revision ed51ee549a62dbef0767d3cc5ca6d7df9c9d397b)
++++ b/app/src/main/java/es/fdi/ucm/pad/notnotion/ui/views/TextEditorView.java	(date 1764278789544)
+@@ -1,21 +1,36 @@
+ package es.fdi.ucm.pad.notnotion.ui.views;
+ 
++import android.content.ContentResolver;
+ import android.content.Context;
++import android.content.Intent;
++import android.graphics.Color;
+ import android.graphics.Typeface;
++import android.net.Uri;
+ import android.text.Editable;
+ import android.text.Spannable;
++import android.text.SpannableString;
+ import android.text.SpannableStringBuilder;
++import android.text.Spanned;
++import android.text.TextPaint;
+ import android.text.TextWatcher;
++import android.text.method.LinkMovementMethod;
++import android.text.style.ClickableSpan;
+ import android.text.style.StyleSpan;
+ import android.text.style.UnderlineSpan;
+ import android.text.style.AbsoluteSizeSpan;
+ import android.util.AttributeSet;
+ import android.util.Log;
+ import android.util.TypedValue;
++import android.view.View;
+ import android.view.ViewGroup;
++import android.webkit.MimeTypeMap;
+ import android.widget.EditText;
+ import android.widget.LinearLayout;
++import android.widget.Toast;
+ 
++import androidx.annotation.NonNull;
++
++import java.io.File;
+ import java.util.ArrayList;
+ import java.util.List;
+ 
+@@ -453,6 +468,60 @@
+         mainEditor.append("\n[Imagen: " + imageUrl + "]\n");
+     }
+ 
++    public void addDocumentBlock(String displayName, String uriString) {
++        SpannableString spannable = new SpannableString(displayName);
++
++        spannable.setSpan(new ClickableSpan() {
++            @Override
++            public void onClick(@NonNull View widget) {
++                if (context != null) {
++
++                    Uri fileUri = Uri.parse(uriString);
++                    String mime = getMimeType(context, fileUri);
++
++                    Intent intent = new Intent(Intent.ACTION_VIEW);
++                    intent.setDataAndType(fileUri, mime);
++                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
++
++                    try {
++                        context.startActivity(intent);
++                    } catch (Exception e) {
++                        Toast.makeText(context, "No hay una app compatible para abrir este archivo", Toast.LENGTH_SHORT).show();
++                    }
++                }
++            }
++
++            @Override
++            public void updateDrawState(@NonNull TextPaint ds) {
++                super.updateDrawState(ds);
++                ds.setUnderlineText(true);
++                ds.setColor(Color.BLUE);
++            }
++        }, 0, displayName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
++
++        mainEditor.append("\n");
++        mainEditor.append(spannable);
++        mainEditor.append("\n");
++
++        mainEditor.setMovementMethod(LinkMovementMethod.getInstance());
++    }
++
++    public static String getMimeType(Context context, Uri uri) {
++        String mimeType = null;
++
++        if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
++            mimeType = context.getContentResolver().getType(uri);
++        } else {
++            String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(uri.getPath())).toString());
++            if (extension != null) {
++                mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
++            }
++        }
++
++        return mimeType != null ? mimeType : "*/*";
++    }
++
++
+     // Métodos de compatibilidad
+     public void changeStyleAndCreateNewBlock(int style) {
+         setCurrentTextStyle(style);
+Index: .idea/deploymentTargetSelector.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"deploymentTargetSelector\">\r\n    <selectionStates>\r\n      <SelectionState runConfigName=\"app\">\r\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\r\n        <DropdownSelection timestamp=\"2025-11-26T17:17:05.301209Z\">\r\n          <Target type=\"DEFAULT_BOOT\">\r\n            <handle>\r\n              <DeviceId pluginId=\"LocalEmulator\" identifier=\"path=C:\\Users\\monic\\.android\\avd\\Pixel_6.avd\" />\r\n            </handle>\r\n          </Target>\r\n        </DropdownSelection>\r\n        <DialogSelection />\r\n      </SelectionState>\r\n    </selectionStates>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
+--- a/.idea/deploymentTargetSelector.xml	(revision ed51ee549a62dbef0767d3cc5ca6d7df9c9d397b)
++++ b/.idea/deploymentTargetSelector.xml	(date 1764278789555)
+@@ -4,10 +4,10 @@
+     <selectionStates>
+       <SelectionState runConfigName="app">
+         <option name="selectionMode" value="DROPDOWN" />
+-        <DropdownSelection timestamp="2025-11-26T17:17:05.301209Z">
++        <DropdownSelection timestamp="2025-11-27T21:21:43.614248800Z">
+           <Target type="DEFAULT_BOOT">
+             <handle>
+-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\monic\.android\avd\Pixel_6.avd" />
++              <DeviceId pluginId="PhysicalDevice" identifier="serial=7l6xuwnzamt4q8y5" />
+             </handle>
+           </Target>
+         </DropdownSelection>
