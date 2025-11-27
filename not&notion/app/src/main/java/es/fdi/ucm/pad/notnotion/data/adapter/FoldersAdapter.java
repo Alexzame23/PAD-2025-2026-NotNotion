@@ -83,7 +83,6 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FolderVi
     }
 
     public void setFolders(List<Folder> list) {
-        Log.d("BUSQUEDA_DEBUG", "setFolders -> recibida=" + (list != null ? list.size() : "null"));
         fullList.clear();
         folders.clear();
 
@@ -96,9 +95,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FolderVi
     }
 
     public void filter(String text) {
-        Log.d(TAG, "FoldersAdapter.filter text='" + text + "'");
         folders.clear();
-
         if (text == null || text.trim().isEmpty()) {
             folders.addAll(fullList);
         } else {

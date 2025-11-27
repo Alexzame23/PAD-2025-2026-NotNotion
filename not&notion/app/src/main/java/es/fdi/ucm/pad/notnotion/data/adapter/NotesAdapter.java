@@ -1,11 +1,12 @@
 package es.fdi.ucm.pad.notnotion.data.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.ImageView;
 import android.graphics.Bitmap;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +23,7 @@ import es.fdi.ucm.pad.notnotion.utils.ImageHelper;
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHolder> {
 
     private List<Note> notes = new ArrayList<>();
+    private List<Note> fullList = new ArrayList<>(); // Lista completa
 
     // ------------------- CLICK NORMAL --------------------
     public interface OnNoteClickListener {
@@ -119,10 +121,31 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         return notes.size();
     }
 
+    // ------------------- NUEVO setNotes -------------------
     public void setNotes(List<Note> newNotes) {
+        fullList.clear();
         notes.clear();
-        if (newNotes != null)
+
+        if (newNotes != null) {
+            fullList.addAll(newNotes);
             notes.addAll(newNotes);
+        }
+        notifyDataSetChanged();
+    }
+
+    // ------------------- NUEVO filter -------------------
+    public void filter(String text) {
+        notes.clear();
+        if (text == null || text.trim().isEmpty()) {
+            notes.addAll(fullList);
+        } else {
+            String q = text.toLowerCase();
+            for (Note n : fullList) {
+                if (n.getTitle() != null && n.getTitle().toLowerCase().contains(q)) {
+                    notes.add(n);
+                }
+            }
+        }
         notifyDataSetChanged();
     }
 
