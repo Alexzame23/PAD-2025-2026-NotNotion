@@ -55,6 +55,7 @@ import es.fdi.ucm.pad.notnotion.ui.profile.ProfileActivity;
 import es.fdi.ucm.pad.notnotion.ui.user_logging.LoginActivity;
 import es.fdi.ucm.pad.notnotion.data.model.ContentBlock;
 import es.fdi.ucm.pad.notnotion.ui.views.TextEditorView;
+import es.fdi.ucm.pad.notnotion.utils.UserProfileHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -156,28 +157,24 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("MainActivity", "Preferencias: " + currentUser.getPreferences());
                 });
 
-                // Foto en botón de perfil
-                if (user.getPhotoUrl() != null) {
-                    Picasso.get()
-                            .load(user.getPhotoUrl())
-                            .placeholder(R.drawable.ic_user)
-                            .error(R.drawable.ic_user)
-                            .into(btnPerfil);
-                }
+                // PERFIL → cargar foto desde helper
+                UserProfileHelper profileHelper = new UserProfileHelper();
+                profileHelper.loadUserPhotoInto(btnPerfil);
 
+                // Ir al perfil al pulsar
                 btnPerfil.setOnClickListener(v -> {
-                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                    startActivity(intent);
+                    startActivity(new Intent(MainActivity.this, ProfileActivity.class));
                 });
 
             } else {
-                // Si NO hay usuario → ir a Login
+
+                // No hay usuario → a Login
                 btnPerfil.setOnClickListener(v -> {
-                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                    startActivity(intent);
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
                 });
             }
+
             currentFolder = new Folder("root", "Root", "None", null, null, 0);
             loadFolderContent(currentFolder);
             foldersAdapter.setOnFolderClickListener(folder -> {
