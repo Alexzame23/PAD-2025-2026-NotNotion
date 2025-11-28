@@ -41,4 +41,16 @@
         <item name="hintEnabled">false</item>
     </style>
 
+    <!-- Tema para alarma de pantalla completa -->
+    <style name="Theme.AlarmFullScreen" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:windowShowWallpaper">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
 </resources>

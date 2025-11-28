@@ -33,4 +33,32 @@
     <string name="note_title">Titulo</string>
 
     <string name="logout">Cerrar sesión</string>
+
+    <string name="alarma">Alarma</string>
+    <string name="titulo_evento">Entrega PAD</string>
+    <string name="descripcion_evento">Es ahora mismo</string>
+    <string name="tiempo_evento">15:00 • 28 Nov 2025</string>
+    <string name="indicador_pospuesto">🔁 Alarma pospuesta</string>
+    <string name="posponer_texto">POSPONER 5 MIN</string>
+    <string name="descartar_alarma">DESCARTAR</string>
+    <string name="nuevo_recordatorio">Nuevo Recordatorio</string>
+    <string name="notificar">Notificar:</string>
+    <string name="ej_tiemponot">Ej: 5</string>
+    <string name="botor_notificacion">antes del evento</string>
+    <string name="cancelar_boton">Cancelar</string>
+    <string name="agregar_boton">Añadir</string>
+    <string name="configurar_recordatorios">Configurar Recordatorios</string>
+    <string name="activar_recordatorios_previos">Activar recordatorios previos</string>
+    <string name="activar_alarma">⏰ Notificar en el momento del evento</string>
+    <string name="rec_prev_config">Recordatorios previos configurados:</string>
+    <string name="sin_rec_prev">Sin recordatorios previos</string>
+    <string name="masrecordatorio_previo">+ Añadir recordatorio previo</string>
+    <string name="sonido_rec">Sonido de recordatorios:</string>
+    <string name="sonido_def">Sonido por defecto</string>
+    <string name="silencioso">Silencioso</string>
+    <string name="sonido_alarma">Sonido de alarma:</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="guardar">Guardar</string>
+    <string name="limite_pos">Límite de postponimientos:</string>
+
 </resources>
