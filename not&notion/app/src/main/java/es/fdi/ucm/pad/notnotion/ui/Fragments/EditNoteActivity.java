@@ -29,6 +29,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -105,49 +106,65 @@ public class EditNoteActivity extends AppCompatActivity {
         storageRef = storage.getReference();
         notesManager = new NotesManager();
 
-        // Obtener datos del Intent
-        if (!loadIntentData()) {
-            Toast.makeText(this, "Error: datos incompletos", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        // Inicializar vistas
+        // Inicializar vistas SIEMPRE antes de cargar datos
         initializeViews();
-
-        // Configurar lanzadores de archivos
         setupActivityLaunchers();
-
-        // Cargar datos de la nota en la interfaz
-        loadNoteData();
-
-        // Configurar listeners de los botones
         setupListeners();
-    }
 
-    // Carga los datos que MainActivity nos pasó mediante el Intent.
-    private boolean loadIntentData() {
         Intent intent = getIntent();
 
-        // Intentar obtener la nota del Intent
+        // ---- CASO 1: viene de MainActivity (nota completa) ----
         note = (Note) intent.getSerializableExtra(EXTRA_NOTE);
         folderId = intent.getStringExtra(EXTRA_FOLDER_ID);
 
-        // Si no hay nota, crear una nueva vacía
-        if (note == null) {
-            Log.d(TAG, "No se recibió nota, creando una nueva");
-            note = new Note();
-            note.setContentBlocks(new ArrayList<>());
+        if (note != null && folderId != null) {
+            Log.d(TAG, "Nota recibida desde MainActivity");
+            loadNoteData();
+            return;
         }
 
-        // folderId para saber dónde guardar
-        if (folderId == null || folderId.isEmpty()) {
-            Log.e(TAG, "No se recibió folderId");
-            return false;
+        // ---- CASO 2: viene desde el calendario ----
+        String noteId = intent.getStringExtra("noteId");
+        if (noteId != null) {
+            Log.d(TAG, "Abriendo nota desde calendario: " + noteId);
+            loadNoteFromFirestore(noteId); // <-- carga asíncrona
+            return; // NO cerrar la activity
         }
 
-        return true;
+        // ---- CASO 3: no hay info ----
+        Toast.makeText(this, "Error: datos incompletos", Toast.LENGTH_SHORT).show();
+        finish();
     }
+
+
+
+    // Carga los datos que MainActivity nos pasó mediante el Intent.
+     private boolean loadIntentData() {
+
+         Intent intent = getIntent();
+
+         // Opción 1: venimos desde MainActivity (nota completa)
+         note = (Note) intent.getSerializableExtra(EXTRA_NOTE);
+         folderId = intent.getStringExtra(EXTRA_FOLDER_ID);
+
+         if (note != null && folderId != null) {
+             Log.d(TAG, "Nota recibida completa desde MainActivity");
+             return true;
+         }
+
+         // Opción 2: venimos desde el calendario
+         String noteId = intent.getStringExtra("noteId");
+         if (noteId != null) {
+             Log.d(TAG, "Nota recibida desde calendario con noteId=" + noteId);
+             loadNoteFromFirestore(noteId);  // <-- AQUÍ CARGAS LA NOTA
+             return false;
+         }
+
+         Log.e(TAG, "No se recibió ni nota ni noteId");
+         return false;
+     }
+
+
 
     // Inicializa todas las referencias a las vistas del layout.
     private void initializeViews() {
@@ -552,6 +569,44 @@ public class EditNoteActivity extends AppCompatActivity {
         }
         saveToFirestore(user.getUid());
     }
+
+
+    private void loadNoteFromFirestore(String noteId) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collectionGroup("notes")
+                .get()
+                .addOnSuccessListener(query -> {
+
+                    for (QueryDocumentSnapshot doc : query) {
+
+                        if (!doc.getId().equals(noteId)) continue;
+
+                        note = doc.toObject(Note.class);
+                        note.setId(noteId);
+
+                        String[] parts = doc.getReference().getPath().split("/");
+                        folderId = parts[3];
+
+                        Log.d(TAG, "Nota cargada: " + note.getTitle());
+                        Log.d(TAG, "FolderId: " + folderId);
+
+                        loadNoteData();  // <-- ahora sí, UI lista
+                        return;
+                    }
+
+                    Toast.makeText(this, "Nota no encontrada", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error al cargar nota", Toast.LENGTH_SHORT).show();
+                    finish();
+                });
+    }
+
+
+
 
     // Guarda la nota en Firestore.
     private void saveToFirestore(String userId) {

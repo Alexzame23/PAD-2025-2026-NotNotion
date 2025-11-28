@@ -60,10 +60,21 @@ public class CalendarFragment extends Fragment {
         recyclerEvents.setAdapter(eventAdapter);
 
         eventAdapter.setOnEventClickListener(event -> {
+
+            if (event.getNoteId() != null && !event.getNoteId().isEmpty()) {
+                // 🔥 ABRIR NOTA DIRECTAMENTE
+                Intent intent = new Intent(getContext(), EditNoteActivity.class);
+                intent.putExtra("noteId", event.getNoteId());
+                startActivity(intent);
+                return;
+            }
+
+            // Si no tiene nota → abrir editor de eventos normal
             Intent intent = new Intent(getContext(), EventEditActivity.class);
             intent.putExtra("eventId", event.getId());
             startActivity(intent);
         });
+
 
 
         // --- FIRESTORE MANAGER ---

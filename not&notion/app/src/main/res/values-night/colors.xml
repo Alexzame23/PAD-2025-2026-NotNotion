@@ -2,7 +2,7 @@
 <resources>
 
     <!-- FONDO GENERAL -->
-    <color name="bg">#161310</color> <!-- marrón oscuro elegante -->
+    <color name="bg">#3A2F28</color><!-- marrón oscuro elegante -->
 
     <!-- TEXTOS -->
     <color name="white">#FFFFFFFF</color>
