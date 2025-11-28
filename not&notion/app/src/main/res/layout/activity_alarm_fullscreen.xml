@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@color/bg">
+
+    <!-- Icono de alarma grande -->
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@drawable/ic_alarm_large"
+        android:layout_marginBottom="32dp"
+        android:contentDescription="@string/alarma"
+        app:tint="@color/text_button" />
+
+    <!-- Título del evento -->
+    <TextView
+        android:id="@+id/tvAlarmTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/titulo_evento"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Descripción del evento -->
+    <TextView
+        android:id="@+id/tvAlarmDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/descripcion_evento"
+        android:textSize="18sp"
+        android:textColor="@color/text_button"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"/>
+
+    <!-- Hora del evento -->
+    <TextView
+        android:id="@+id/tvAlarmTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tiempo_evento"
+        android:textSize="16sp"
+        android:textColor="@color/text_button"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Indicador de pospuesto -->
+    <TextView
+        android:id="@+id/tvAlarmSnoozeInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/indicador_pospuesto"
+        android:textSize="14sp"
+        android:textColor="@color/text_button"
+        android:background="@drawable/bg_snooze_badge"
+        android:padding="8dp"
+        android:layout_marginBottom="48dp"
+        android:visibility="gone"/>
+
+    <!-- Espaciador flexible -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <!-- Botón POSPONER -->
+    <Button
+        android:id="@+id/btnAlarmSnooze"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:text="@string/posponer_texto"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_alarm_button_snooze"
+        android:layout_marginBottom="16dp"
+        android:elevation="4dp"/>
+
+    <!-- Botón DESCARTAR -->
+    <Button
+        android:id="@+id/btnAlarmDismiss"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:text="@string/descartar_alarma"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_alarm_button_dismiss"
+        android:elevation="4dp"/>
+
+</LinearLayout>

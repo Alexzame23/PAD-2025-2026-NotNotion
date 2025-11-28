@@ -8,6 +8,21 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
 
+    <!-- PERMISOS PARA NOTIFICACIONES -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- PERMISOS PARA ALARMAS DE PANTALLA COMPLETA -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD"
+        android:maxSdkVersion="27" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -33,11 +48,12 @@
             android:name=".ui.main.MainActivity"
             android:exported="true" />
 
-        <!-- Nueva línea: pantalla de registro -->
+        <!-- Pantalla de registro -->
         <activity
             android:name=".ui.user_register.RegisterActivity"
             android:exported="true" />
 
+        <!-- Perfil de usuario -->
         <activity
             android:name=".ui.profile.ProfileActivity"
             android:exported="false" />
@@ -47,12 +63,43 @@
             android:exported="false" />
 
 
-        <activity android:name=".ui.events.EventEditActivity" />
+        <activity
+            android:name=".ui.events.EventEditActivity"
+            android:exported="false" />
 
+        <!-- Edición de notas -->
         <activity
             android:name=".ui.Fragments.EditNoteActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"/>
+
+        <!-- ALARMA A PANTALLA COMPLETA -->
+        <activity
+            android:name=".ui.notifications.AlarmFullScreenActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.AlarmFullScreen"
+            android:exported="false" />
+
+        <!-- RECEIVER PARA NOTIFICACIONES DE EVENTOS -->
+        <receiver
+            android:name=".ui.notifications.NotificationReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- RECEIVER PARA ACCIÓN DE SNOOZE -->
+        <receiver
+            android:name=".ui.notifications.SnoozeActionReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="ACTION_SNOOZE_ALARM" />
+            </intent-filter>
+        </receiver>
 
     </application>
 </manifest>

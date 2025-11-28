@@ -165,4 +165,26 @@ public class CalendarEventsManager {
                 .addOnSuccessListener(listener)
                 .addOnFailureListener(e -> Log.e("Firestore", "Error al obtener eventos futuros", e));
     }
+
+    /**
+     * Crea un evento y devuelve su ID (necesario para programar notificaciones)
+     */
+    public void addEventWithNotifications(@NonNull CalendarEvent event, OnSuccessListener<String> listener) {
+        String path = getUserEventsPath();
+        if (path == null) return;
+
+        String eventId = UUID.randomUUID().toString();
+        event.setId(eventId);
+        event.setCreatedAt(Timestamp.now());
+        event.setUpdatedAt(Timestamp.now());
+
+        db.collection(path)
+                .document(eventId)
+                .set(event)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Evento creado correctamente con ID: " + eventId);
+                    listener.onSuccess(eventId);
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error al crear evento", e));
+    }
 }

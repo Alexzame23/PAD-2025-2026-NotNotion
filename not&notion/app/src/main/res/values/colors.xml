@@ -11,4 +11,5 @@
     <color name="text_button">#ff4e2917</color>
     <color name="transparent">#00000000</color>
     <color name="light_brown_transparent">#80DDBA99</color>
+    <color name="dimiss">#37474F</color>
 </resources>

@@ -33,7 +33,32 @@
     <string name="Note_content">Start typing...</string>
     <string name="note_title">Title</string>
 
-
-
     <string name="logout">Logout</string>
+
+    <string name="alarma">Alarm</string>
+    <string name="titulo_evento">PAD Submission</string>
+    <string name="descripcion_evento">It\'s right now</string>
+    <string name="tiempo_evento">15:00 • Nov 28, 2025</string>
+    <string name="indicador_pospuesto">🔁 Alarm snoozed</string>
+    <string name="posponer_texto">SNOOZE 5 MIN</string>
+    <string name="descartar_alarma">DISMISS</string>
+    <string name="nuevo_recordatorio">New Reminder</string>
+    <string name="notificar">Notify:</string>
+    <string name="ej_tiemponot">Ex: 5</string>
+    <string name="botor_notificacion">before the event</string>
+    <string name="cancelar_boton">Cancel</string>
+    <string name="agregar_boton">Add</string>
+    <string name="configurar_recordatorios">Configure Reminders</string>
+    <string name="activar_recordatorios_previos">Enable previous reminders</string>
+    <string name="activar_alarma">⏰ Notify at event time</string>
+    <string name="rec_prev_config">Previous reminders configured:</string>
+    <string name="sin_rec_prev">No previous reminders</string>
+    <string name="masrecordatorio_previo">+ Add previous reminder</string>
+    <string name="sonido_rec">Reminders sound:</string>
+    <string name="sonido_def">Default sound</string>
+    <string name="silencioso">Silent</string>
+    <string name="sonido_alarma">Alarm sound:</string>
+    <string name="cancelar">Cancel</string>
+    <string name="guardar">Save</string>
+    <string name="limite_pos">Snooze limit:</string>
 </resources>
