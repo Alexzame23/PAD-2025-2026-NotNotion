@@ -86,6 +86,36 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        boolean isLandscape = getResources().getBoolean(R.bool.isLandscape);
+
+        if (isLandscape) {
+            ImageButton btnNotes = findViewById(R.id.btnNotes);
+            ImageButton btnCalendar = findViewById(R.id.btnCalendar);
+            ImageButton btnPerfil = findViewById(R.id.btnPerfil);
+
+            if (btnNotes != null) {
+                btnNotes.setOnClickListener(v -> {
+                    volverAlExploradorConUI();
+                });
+            }
+
+            if (btnCalendar != null) {
+                btnCalendar.setOnClickListener(v -> {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.contentContainer, new CalendarFragment())
+                            .commit();
+                });
+            }
+
+            if (btnPerfil != null) {
+                btnPerfil.setOnClickListener(v -> {
+                    startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                });
+            }
+        }
+
+
         FrameLayout contentContainer = findViewById(R.id.contentContainer);
 
         FirebaseFirestore.setLoggingEnabled(true);
