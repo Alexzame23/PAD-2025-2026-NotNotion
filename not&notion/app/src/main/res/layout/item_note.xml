@@ -25,6 +25,7 @@
         android:id="@+id/noteTitle"
         android:textColor="@color/black"
         android:textSize="16sp"
+        android:maxLength="15"
         android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
