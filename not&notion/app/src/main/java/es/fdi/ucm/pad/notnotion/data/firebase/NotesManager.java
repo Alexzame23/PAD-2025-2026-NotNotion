@@ -171,4 +171,15 @@ public class NotesManager {
                 .addOnSuccessListener(listener)
                 .addOnFailureListener(e -> Log.e(TAG, "Error al obtener todas las notas", e));
     }
+
+    public void countNotesInFolder(@NonNull String folderId,
+                                   @NonNull OnSuccessListener<Integer> listener) {
+        String path = getNotesPath(folderId);
+        if (path == null) return;
+
+        db.collection(path)
+                .get()
+                .addOnSuccessListener(q -> listener.onSuccess(q.size()))
+                .addOnFailureListener(e -> Log.e(TAG, "Error contando notas", e));
+    }
 }

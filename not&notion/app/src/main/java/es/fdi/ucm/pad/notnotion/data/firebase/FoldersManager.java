@@ -145,4 +145,76 @@ public class FoldersManager {
                 .addOnSuccessListener(listener)
                 .addOnFailureListener(e -> Log.e(TAG, "Error al obtener carpetas raíz", e));
     }
+
+    public void countSubfolders(@NonNull String parentFolderId,
+                                @NonNull OnSuccessListener<Integer> listener) {
+        String path = getUserFoldersPath();
+        if (path == null) return;
+
+        db.collection(path)
+                .whereEqualTo("parentFolderId", parentFolderId)
+                .get()
+                .addOnSuccessListener(q -> listener.onSuccess(q.size()))
+                .addOnFailureListener(e -> Log.e(TAG, "Error contando subcarpetas", e));
+    }
+
+    public void deleteFolderRecursively(@NonNull String folderId, @NonNull Runnable onComplete) {
+
+        String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
+        if (uid == null) {
+            Log.e(TAG, "No hay usuario autenticado");
+            return;
+        }
+
+        String foldersPath = "users/" + uid + "/folders";
+        String notesPath   = "users/" + uid + "/folders/" + folderId + "/notes";
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // 1) Borrar TODAS las notas dentro de esta carpeta
+        db.collection(notesPath)
+                .get()
+                .addOnSuccessListener(notesSnapshot -> {
+
+                    // Borrar notas individualmente
+                    for (var doc : notesSnapshot.getDocuments()) {
+                        doc.getReference().delete();
+                    }
+
+                    // 2) Buscar subcarpetas
+                    db.collection(foldersPath)
+                            .whereEqualTo("parentFolderId", folderId)
+                            .get()
+                            .addOnSuccessListener(subfoldersSnapshot -> {
+
+                                if (subfoldersSnapshot.isEmpty()) {
+                                    // 3) No hay subcarpetas → borrar directamente la carpeta
+                                    db.collection(foldersPath)
+                                            .document(folderId)
+                                            .delete()
+                                            .addOnSuccessListener(a -> onComplete.run());
+                                    return;
+                                }
+
+                                // 4) Procesar subcarpetas recursivamente
+                                final int total = subfoldersSnapshot.size();
+                                final int[] completed = {0};
+
+                                for (var doc : subfoldersSnapshot) {
+                                    String childFolderId = doc.getId();
+
+                                    deleteFolderRecursively(childFolderId, () -> {
+                                        completed[0]++;
+                                        if (completed[0] == total) {
+                                            // Cuando todas las subcarpetas estén eliminadas → borrar carpeta actual
+                                            db.collection(foldersPath)
+                                                    .document(folderId)
+                                                    .delete()
+                                                    .addOnSuccessListener(a -> onComplete.run());
+                                        }
+                                    });
+                                }
+                            });
+                });
+    }
 }

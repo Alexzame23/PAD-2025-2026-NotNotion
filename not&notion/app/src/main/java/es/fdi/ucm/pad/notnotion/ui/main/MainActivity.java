@@ -29,6 +29,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.squareup.picasso.Picasso;
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -246,26 +247,36 @@ public class MainActivity extends AppCompatActivity {
         }
         foldersAdapter.setOnFolderLongClickListener((folder, view) -> {
             PopupMenu popup = new PopupMenu(MainActivity.this, view);
-            popup.getMenu().add("Añadir a favoritos");
-            popup.getMenu().add("Renombrar");
-            popup.getMenu().add("Eliminar");
+            popup.getMenu().add(0, 0, 0, "Renombrar");
+            popup.getMenu().add(0, 1, 1, "Eliminar");
+
+            popup.setOnMenuItemClickListener(item -> {
+                switch (item.getItemId()) {
+                    case 1:
+                        confirmDeleteFolder(folder);
+                        return true;
+                }
+                return false;
+            });
 
             popup.show();
         });
         notesAdapter.setOnNoteLongClickListener((note, view) -> {
 
             PopupMenu popup = new PopupMenu(MainActivity.this, view);
-            popup.getMenu().add(0, 0, 0, "Añadir a favoritos");
-            popup.getMenu().add(0, 1, 1, "Renombrar");
-            popup.getMenu().add(0, 2, 2, "Asociar a fecha");
-            popup.getMenu().add(0, 3, 3, "Eliminar");
+            popup.getMenu().add(0, 0, 0, "Renombrar");
+            popup.getMenu().add(0, 1, 1, "Asociar a fecha");
+            popup.getMenu().add(0, 2, 2, "Eliminar");
 
             popup.setOnMenuItemClickListener(item -> {
 
                 switch (item.getItemId()) {
 
-                    case 2: // Asociar fecha
+                    case 1: // Asociar fecha
                         abrirSelectorFecha(note);
+                        return true;
+                    case 2:
+                        confirmDeleteNote(note);
                         return true;
                 }
 
@@ -565,6 +576,50 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void confirmDeleteFolder(@NonNull Folder folder) {
+
+        foldersManager.countSubfolders(folder.getId(), subCount -> {
+
+            notesManager.countNotesInFolder(folder.getId(), noteCount -> {
+
+                int total = subCount + noteCount;
+
+                String msg = "Esta carpeta contiene " + total + " elementos"
+                        + " (" + subCount + " carpetas, " + noteCount + " notas)."
+                        + "\n\nSe eliminarán TODOS los elementos dentro de ella."
+                        + "\n\n¿Seguro que quieres eliminarla?";
+
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Eliminar carpeta \"" + folder.getName() + "\"")
+                        .setMessage(msg)
+                        .setPositiveButton("Eliminar", (d, w) -> {
+
+                            foldersManager.deleteFolderRecursively(folder.getId(), () -> {
+                                runOnUiThread(() -> {
+                                    loadFolderContent(currentFolder);
+                                    Toast.makeText(this, "Carpeta eliminada", Toast.LENGTH_SHORT).show();
+                                });
+                            });
+
+                        })
+                        .setNegativeButton("Cancelar", null)
+                        .show();
+            });
+        });
+    }
+
+    private void confirmDeleteNote(@NonNull Note note) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Eliminar nota")
+                .setMessage("¿Seguro que quieres eliminar la nota \"" + (note.getTitle() == null ? "" : note.getTitle()) + "\"?")
+                .setPositiveButton("Eliminar", (d, w) -> {
+                    notesManager.deleteNote(currentFolder.getId(), note.getId());
+                    loadFolderContent(currentFolder);
+                    Toast.makeText(this, "Nota eliminada", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
 
     private void showProfileMenu(ImageButton anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
