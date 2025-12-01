@@ -60,5 +60,6 @@
     <string name="cancelar">Cancelar</string>
     <string name="guardar">Guardar</string>
     <string name="limite_pos">Límite de postponimientos:</string>
+    <string name="add_event">Añadir evento</string>
 
 </resources>

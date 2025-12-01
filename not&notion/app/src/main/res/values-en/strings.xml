@@ -61,4 +61,5 @@
     <string name="cancelar">Cancel</string>
     <string name="guardar">Save</string>
     <string name="limite_pos">Snooze limit:</string>
+    <string name="add_event">Add event</string>
 </resources>
