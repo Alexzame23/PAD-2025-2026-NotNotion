@@ -13,6 +13,7 @@ import java.util.List;
 import es.fdi.ucm.pad.notnotion.data.model.CalendarEvent;
 import es.fdi.ucm.pad.notnotion.ui.notifications.NotificationReceiver;
 import es.fdi.ucm.pad.notnotion.utils.NotificationHelper;
+import es.fdi.ucm.pad.notnotion.ui.events.EventEditActivity;
 
 public class NotificationScheduler {
 
@@ -123,6 +124,7 @@ public class NotificationScheduler {
 
     /**
      * Programa la alarma en el momento exacto del evento
+     * Usa setAlarmClock para MÁXIMA PRECISIÓN
      */
     private static void scheduleEventTimeAlarm(Context context, CalendarEvent event, long eventTimeMillis) {
 
@@ -132,15 +134,16 @@ public class NotificationScheduler {
             return;
         }
 
+        // Intent que dispara NotificationReceiver
         Intent intent = new Intent(context, NotificationReceiver.class);
         intent.putExtra("eventId", event.getId());
         intent.putExtra("eventTitle", event.getTitle());
         intent.putExtra("eventDescription", event.getDescription());
         intent.putExtra("eventTimeMillis", eventTimeMillis);
         intent.putExtra("soundType", event.getEventTimeNotificationSound());
-        intent.putExtra("isEventTimeAlarm", true); // ✅ Marcar como alarma del momento
+        intent.putExtra("isEventTimeAlarm", true);
+        intent.putExtra("isSnoozed", false);
 
-        // RequestCode especial para alarma del momento
         int requestCode = generateEventTimeAlarmRequestCode(event.getId());
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
@@ -151,23 +154,39 @@ public class NotificationScheduler {
         );
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // Usar setAlarmClock para máxima prioridad
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                // Intent SEPARADO para mostrar en pantalla de bloqueo
+                Intent showIntent = new Intent(context, es.fdi.ucm.pad.notnotion.ui.events.EventEditActivity.class);
+                showIntent.putExtra("eventId", event.getId());
+                showIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+                PendingIntent showPendingIntent = PendingIntent.getActivity(
+                        context,
+                        requestCode + 1000,
+                        showIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                );
+
+                // AlarmClockInfo con showPendingIntent (separado)
                 AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(
                         eventTimeMillis,
-                        pendingIntent
+                        showPendingIntent
                 );
+
                 alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
+
+                Log.d(TAG, "ALARMA programada con setAlarmClock: " + event.getTitle() +
+                        "\n   Hora exacta: " + new java.util.Date(eventTimeMillis) +
+                        "\n   ⚠Máxima prioridad - Ignora restricciones");
             } else {
                 alarmManager.setExact(
                         AlarmManager.RTC_WAKEUP,
                         eventTimeMillis,
                         pendingIntent
                 );
-            }
 
-            Log.d(TAG, "ALARMA DEL MOMENTO programada: " + event.getTitle() +
-                    " a las " + new java.util.Date(eventTimeMillis));
+                Log.d(TAG, "ALARMA programada" + event.getTitle());
+            }
 
         } catch (SecurityException e) {
             Log.e(TAG, "Permiso SCHEDULE_EXACT_ALARM denegado", e);

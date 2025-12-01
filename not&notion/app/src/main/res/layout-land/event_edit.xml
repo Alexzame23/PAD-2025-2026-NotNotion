@@ -34,6 +34,7 @@
                 android:textColor="@color/black"
                 android:layout_marginBottom="24dp"/>
 
+            <!-- TÍTULO DEL EVENTO -->
             <EditText
                 android:id="@+id/editEventTitle"
                 android:layout_width="match_parent"
@@ -44,8 +45,10 @@
                 android:textSize="20sp"
                 android:background="@android:color/transparent"
                 android:paddingTop="8dp"
-                android:paddingBottom="8dp"/>
+                android:paddingBottom="8dp"
+                android:inputType="textCapSentences"/>
 
+            <!-- DESCRIPCIÓN -->
             <EditText
                 android:id="@+id/editEventDescription"
                 android:layout_width="match_parent"
@@ -57,7 +60,7 @@
                 android:background="@android:color/transparent"
                 android:layout_marginTop="16dp"/>
 
-
+            <!-- BOTÓN SELECCIONAR FECHA -->
             <Button
                 android:id="@+id/btnPickDate"
                 android:layout_width="match_parent"
@@ -67,6 +70,7 @@
                 android:backgroundTint="@color/light_yellow"
                 android:layout_marginTop="22dp" />
 
+            <!-- BOTÓN SELECCIONAR HORA -->
             <Button
                 android:id="@+id/btnPickTime"
                 android:layout_width="match_parent"
@@ -76,6 +80,53 @@
                 android:backgroundTint="@color/light_yellow"
                 android:layout_marginTop="12dp" />
 
+            <!-- SECCIÓN DE NOTIFICACIONES -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp">
+
+                <!-- BOTÓN DE CONFIGURAR NOTIFICACIONES -->
+                <ImageButton
+                    android:id="@+id/btnConfigureNotifications"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_notification"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Configurar notificaciones"/>
+
+                <!-- TEXTOS DE ESTADO -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Recordatorios"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"/>
+
+                    <TextView
+                        android:id="@+id/tvNotificationStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sin recordatorios"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/darker_gray"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- BOTÓN GUARDAR -->
             <Button
                 android:id="@+id/btnSaveEvent"
                 android:layout_width="match_parent"
@@ -83,8 +134,9 @@
                 android:text="Guardar"
                 android:textColor="@android:color/white"
                 android:backgroundTint="@color/brown"
-                android:layout_marginTop="30dp" />
+                android:layout_marginTop="24dp" />
 
+            <!-- BOTÓN ELIMINAR -->
             <Button
                 android:id="@+id/btnDeleteEvent"
                 android:layout_width="match_parent"
@@ -93,7 +145,6 @@
                 android:textColor="@android:color/white"
                 android:backgroundTint="@color/brown"
                 android:layout_marginTop="12dp"/>
-
 
         </LinearLayout>
     </ScrollView>
