@@ -13,7 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="🔔 5 minutos antes"
+        android:text="@string/minutos_antes"
         android:textSize="14sp"
         android:textColor="@android:color/black"/>
 
@@ -23,7 +23,7 @@
         android:layout_height="32dp"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Eliminar recordatorio"
+        android:contentDescription="@string/eliminar_recordatorio"
         app:tint="@android:color/holo_red_dark"/>
 
 </LinearLayout>

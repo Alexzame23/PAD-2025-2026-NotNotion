@@ -35,7 +35,7 @@
     <string name="logout">Cerrar sesión</string>
 
     <string name="alarma">Alarma</string>
-    <string name="titulo_evento">Entrega PAD</string>
+    <string name="titulo_evento">Titulo del evento</string>
     <string name="descripcion_evento">Es ahora mismo</string>
     <string name="tiempo_evento">15:00 • 28 Nov 2025</string>
     <string name="indicador_pospuesto">🔁 Alarma pospuesta</string>
@@ -60,5 +60,29 @@
     <string name="cancelar">Cancelar</string>
     <string name="guardar">Guardar</string>
     <string name="limite_pos">Límite de postponimientos:</string>
+    <string name="imagen_portada">Imagen de portada</string>
+    <string name="anadir_portada">+ Añadir portada</string>
+    <string name="guardar_volver">Guardar y volver</string>
+    <string name="anadir_contenido">Añadir contenido</string>
+    <string name="anadir_evento">Añadir evento</string>
+    <string name="descripcion">Descripción</string>
+    <string name="seleccionar_fecha">Seleccionar fecha</string>
+    <string name="seleccionar_hora">Seleccionar hora</string>
+    <string name="configurar_notificaciones">Configurar notificaciones</string>
+    <string name="recordatorios">Recordatorios</string>
+    <string name="sin_recordatorios">Sin recordatorios</string>
+    <string name="eliminar_evento">Eliminar evento</string>
+    <string name="volver">Volver</string>
+    <string name="minutos_antes">5 minutos antes</string>
+    <string name="eliminar_recordatorio">Eliminar recordatorio</string>
+    <string name="editar_perfil">Editar perfil</string>
+    <string name="uid">UID:</string>
+    <string name="cambiar_foto">Cambiar foto</string>
+    <string name="introduce_nombre">Introduce tu nombre</string>
+    <string name="cambiar_contrasena">Cambiar contraseña (opcional)</string>
+    <string name="contrasena_actual">Contraseña actual</string>
+    <string name="nueva_contrasena">Nueva contraseña</string>
+    <string name="repetir_contrasena">Repite la nueva contraseña</string>
+    <string name="guardar_cambios">Guardar cambios</string>
 
 </resources>

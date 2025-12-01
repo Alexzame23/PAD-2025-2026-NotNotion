@@ -36,7 +36,7 @@
     <string name="logout">Logout</string>
 
     <string name="alarma">Alarm</string>
-    <string name="titulo_evento">PAD Submission</string>
+    <string name="titulo_evento">Event title</string>
     <string name="descripcion_evento">It\'s right now</string>
     <string name="tiempo_evento">15:00 • Nov 28, 2025</string>
     <string name="indicador_pospuesto">🔁 Alarm snoozed</string>
@@ -61,4 +61,28 @@
     <string name="cancelar">Cancel</string>
     <string name="guardar">Save</string>
     <string name="limite_pos">Snooze limit:</string>
+    <string name="imagen_portada">Cover image</string>
+    <string name="anadir_portada">+ Add cover</string>
+    <string name="guardar_volver">Save and return</string>
+    <string name="anadir_contenido">Add content</string>
+    <string name="anadir_evento">Add event</string>
+    <string name="descripcion">Description</string>
+    <string name="seleccionar_fecha">Select date</string>
+    <string name="seleccionar_hora">Select time</string>
+    <string name="configurar_notificaciones">Configure notifications</string>
+    <string name="recordatorios">Reminders</string>
+    <string name="sin_recordatorios">No reminders</string>
+    <string name="eliminar_evento">Delete event</string>
+    <string name="volver">Go back</string>
+    <string name="minutos_antes">5 minutes before</string>
+    <string name="eliminar_recordatorio">Delete reminder</string>
+    <string name="editar_perfil">Edit profile</string>
+    <string name="uid">UID:</string>
+    <string name="cambiar_foto">Change photo</string>
+    <string name="introduce_nombre">Enter your name</string>
+    <string name="cambiar_contrasena">Change password (optional)</string>
+    <string name="contrasena_actual">Current password</string>
+    <string name="nueva_contrasena">New password</string>
+    <string name="repetir_contrasena">Repeat new password</string>
+    <string name="guardar_cambios">Save changes</string>
 </resources>

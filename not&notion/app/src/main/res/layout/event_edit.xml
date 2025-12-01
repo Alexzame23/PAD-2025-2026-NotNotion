@@ -21,7 +21,7 @@
                 android:id="@+id/titleAddEvent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Añadir evento"
+                android:text="@string/anadir_evento"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"
@@ -31,7 +31,7 @@
                 android:id="@+id/editEventTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Título del evento"
+                android:hint="@string/titulo_evento"
                 android:textColor="@color/black"
                 android:textColorHint="@color/light_brown"
                 android:textSize="20sp"
@@ -44,7 +44,7 @@
                 android:id="@+id/editEventDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Descripción"
+                android:hint="@string/descripcion"
                 android:textColor="@color/black"
                 android:textColorHint="@color/light_brown"
                 android:textSize="16sp"
@@ -56,7 +56,7 @@
                 android:id="@+id/btnPickDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Seleccionar fecha"
+                android:text="@string/seleccionar_fecha"
                 android:textColor="@color/brown"
                 android:backgroundTint="@color/light_yellow"
                 android:layout_marginTop="16dp" />
@@ -65,7 +65,7 @@
                 android:id="@+id/btnPickTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Seleccionar hora"
+                android:text="@string/seleccionar_hora"
                 android:textColor="@color/brown"
                 android:backgroundTint="@color/light_yellow"
                 android:layout_marginTop="12dp" />
@@ -83,7 +83,7 @@
                     android:layout_height="48dp"
                     android:src="@drawable/ic_notification"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Configurar notificaciones"/>
+                    android:contentDescription="@string/configurar_notificaciones"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -95,7 +95,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Recordatorios"
+                        android:text="@string/recordatorios"
                         android:textSize="16sp"
                         android:textStyle="bold"/>
 
@@ -103,7 +103,7 @@
                         android:id="@+id/tvNotificationStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sin recordatorios"
+                        android:text="@string/sin_recordatorios"
                         android:textSize="14sp"
                         android:textColor="@android:color/darker_gray"/>
 
@@ -116,7 +116,7 @@
                 android:id="@+id/btnSaveEvent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Guardar"
+                android:text="@string/guardar"
                 android:backgroundTint="@color/brown"
                 android:textColor="@android:color/white"
                 android:layout_marginTop="24dp"/>
@@ -125,7 +125,7 @@
                 android:id="@+id/btnDeleteEvent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Eliminar evento"
+                android:text="@string/eliminar_evento"
                 android:backgroundTint="@color/brown"
                 android:textColor="@android:color/white"
                 android:layout_marginTop="12dp"/>
@@ -139,7 +139,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_return"
-        android:contentDescription="Volver"
+        android:contentDescription="@string/volver"
         app:tint="@android:color/white"
         app:backgroundTint="@color/brown"
         android:layout_margin="24dp"

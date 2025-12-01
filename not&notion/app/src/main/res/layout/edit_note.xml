@@ -42,14 +42,14 @@
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     android:visibility="gone"
-                    android:contentDescription="Imagen de portada"/>
+                    android:contentDescription="@string/imagen_portada"/>
 
                 <!-- TextView para añadir portada -->
                 <TextView
                     android:id="@+id/btnAddCover"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="+ Añadir portada"
+                    android:text="@string/anadir_portada"
                     android:textColor="@color/brown"
                     android:textSize="14sp"
                     android:layout_gravity="center"
@@ -183,7 +183,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_return"
-        android:contentDescription="Guardar y volver"
+        android:contentDescription="@string/guardar_volver"
         app:tint="@android:color/white"
         app:backgroundTint="@color/brown"
         app:layout_constraintStart_toStartOf="parent"
@@ -196,7 +196,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_add"
-        android:contentDescription="Añadir contenido"
+        android:contentDescription="@string/anadir_contenido"
         app:tint="@android:color/white"
         app:backgroundTint="@color/brown"
         app:layout_constraintEnd_toEndOf="parent"
