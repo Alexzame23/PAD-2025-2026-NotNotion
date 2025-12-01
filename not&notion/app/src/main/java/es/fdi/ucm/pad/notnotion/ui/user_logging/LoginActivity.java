@@ -50,8 +50,6 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.login_activity);
 
         mAuth = FirebaseAuth.getInstance();
-
-        // Si ya está logueado → ir a Main
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             initializeUserInFirestore(currentUser, () -> {
@@ -63,7 +61,12 @@ public class LoginActivity extends AppCompatActivity {
         btnLanguage.setOnClickListener(v -> showLanguageDialog());
 
         TextView goToRegister = findViewById(R.id.new_user);
-        goToRegister.setOnClickListener(v -> goToRegisterActivity());
+        goToRegister.setOnClickListener(v -> {
+            checkInternetConnection(
+                    () -> goToRegisterActivity(),
+                    () -> Toast.makeText(this, "No hay conexión a Internet", Toast.LENGTH_LONG).show()
+            );
+        });
 
         emailField = findViewById(R.id.email);
         passwordField = findViewById(R.id.password);
@@ -80,19 +83,29 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, task -> {
-                        if (task.isSuccessful()) {
-                            FirebaseUser firebaseUser = mAuth.getCurrentUser();
+            checkInternetConnection(
+                    () -> {
+                        mAuth.signInWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(this, task -> {
+                                    if (task.isSuccessful()) {
+                                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                                        initializeUserInFirestore(firebaseUser, this::goToMainActivity);
+                                    } else {
+                                        Toast.makeText(this, "Error al iniciar sesión", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    },
 
-                            initializeUserInFirestore(firebaseUser, () -> {
-                                goToMainActivity();
-                            });
-                        }
-                    });
+                    () -> Toast.makeText(this, "No hay conexión a Internet", Toast.LENGTH_LONG).show()
+            );
         });
 
-        googleButton.setOnClickListener(v -> launchGoogleSignIn());
+        googleButton.setOnClickListener(v ->
+                checkInternetConnection(
+                        this::launchGoogleSignIn,
+                        () -> Toast.makeText(this, "No hay conexión a Internet", Toast.LENGTH_LONG).show()
+                )
+        );
     }
 
     @Override
@@ -176,7 +189,6 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-
     private void showLanguageDialog() {
         final String[] languages = {"Español", "English"};
         final String[] codes = {"es", "en"};
@@ -189,5 +201,20 @@ public class LoginActivity extends AppCompatActivity {
                     recreate();
                 })
                 .show();
+    }
+
+    private void checkInternetConnection(Runnable onSuccess, Runnable onTimeout) {
+        new Thread(() -> {
+            try {
+                java.net.InetAddress ipAddr = java.net.InetAddress.getByName("8.8.8.8");
+                if (!ipAddr.equals("")) {
+                    runOnUiThread(onSuccess);
+                }
+            } catch (Exception e) {
+                runOnUiThread(onTimeout);
+            }
+        }).start();
+
+        new android.os.Handler(getMainLooper()).postDelayed(onTimeout, 5000);
     }
 }
