@@ -2,6 +2,7 @@ package es.fdi.ucm.pad.notnotion.ui.main;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.icu.util.Calendar;
 import android.net.Uri;
@@ -62,6 +63,7 @@ import es.fdi.ucm.pad.notnotion.ui.profile.ProfileActivity;
 import es.fdi.ucm.pad.notnotion.ui.user_logging.LoginActivity;
 import es.fdi.ucm.pad.notnotion.data.model.ContentBlock;
 import es.fdi.ucm.pad.notnotion.ui.views.TextEditorView;
+import es.fdi.ucm.pad.notnotion.utils.LocaleHelper;
 import es.fdi.ucm.pad.notnotion.utils.UserProfileHelper;
 
 public class MainActivity extends AppCompatActivity {
@@ -81,6 +83,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView routeTextShow;
 
     private EditText busquedaBarra;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(es.fdi.ucm.pad.notnotion.utils.LocaleHelper.applyLocale(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

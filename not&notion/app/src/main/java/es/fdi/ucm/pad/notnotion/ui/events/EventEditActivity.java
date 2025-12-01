@@ -35,6 +35,7 @@ import es.fdi.ucm.pad.notnotion.data.firebase.CalendarEventsManager;
 import es.fdi.ucm.pad.notnotion.data.model.CalendarEvent;
 import es.fdi.ucm.pad.notnotion.ui.notifications.NotificationConfigDialog;
 import es.fdi.ucm.pad.notnotion.ui.notifications.NotificationScheduler;
+import es.fdi.ucm.pad.notnotion.utils.LocaleHelper;
 import es.fdi.ucm.pad.notnotion.utils.NotificationHelper;
 
 public class EventEditActivity extends AppCompatActivity {
@@ -214,6 +215,10 @@ public class EventEditActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(es.fdi.ucm.pad.notnotion.utils.LocaleHelper.applyLocale(newBase));
+    }
     // ACTUALIZAR TEXTO DE ESTADO
     private void updateNotificationStatusText() {
         int totalReminders = 0;

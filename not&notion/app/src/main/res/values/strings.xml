@@ -17,7 +17,7 @@
     <string name="or">o</string>
     <string name="user">Usuario</string>
     <string name="name">Nombre</string>
-    <string name="email">Correo</string>
+    <string name="email">Correo: %1$s</string>
     <string name="create_account">Crear cuenta</string>
     <string name="already_have_an_account">Ya tienes cuenta?</string>
     <string name="select_language">Seleccionar lenguaje</string>

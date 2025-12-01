@@ -28,6 +28,7 @@ public class NotificationHelper {
     private static final String ALARM_CHANNEL_NAME = "Alarmas de Eventos";
     private static final String ALARM_CHANNEL_DESC = "Alarmas en el momento del evento";
 
+
     /**
      * Crea los canales de notificaciones (necesario para Android 8.0+)
      */

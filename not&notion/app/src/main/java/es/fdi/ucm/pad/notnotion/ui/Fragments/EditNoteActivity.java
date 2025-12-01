@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -41,6 +42,7 @@ import es.fdi.ucm.pad.notnotion.data.model.ContentBlock;
 import es.fdi.ucm.pad.notnotion.data.model.Note;
 import es.fdi.ucm.pad.notnotion.ui.views.TextEditorView;
 import es.fdi.ucm.pad.notnotion.utils.ImageHelper;
+import es.fdi.ucm.pad.notnotion.utils.LocaleHelper;
 
 // Activity encargada de editar notas comunicandose con MainActivity
 
@@ -86,6 +88,11 @@ public class EditNoteActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> pickCoverLauncher;
     private ActivityResultLauncher<Intent> pickContentImageLauncher;
     private ActivityResultLauncher<Intent> pickDocumentLauncher;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(es.fdi.ucm.pad.notnotion.utils.LocaleHelper.applyLocale(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

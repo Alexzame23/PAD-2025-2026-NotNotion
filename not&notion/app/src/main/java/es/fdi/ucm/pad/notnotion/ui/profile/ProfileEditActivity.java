@@ -1,5 +1,6 @@
 package es.fdi.ucm.pad.notnotion.ui.profile;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 import es.fdi.ucm.pad.notnotion.R;
 import es.fdi.ucm.pad.notnotion.utils.ImageHelper;
+import es.fdi.ucm.pad.notnotion.utils.LocaleHelper;
 
 public class ProfileEditActivity extends AppCompatActivity {
 
@@ -36,6 +38,11 @@ public class ProfileEditActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(es.fdi.ucm.pad.notnotion.utils.LocaleHelper.applyLocale(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

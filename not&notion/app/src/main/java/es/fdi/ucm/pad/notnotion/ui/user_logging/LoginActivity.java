@@ -29,6 +29,7 @@ import es.fdi.ucm.pad.notnotion.R;
 import es.fdi.ucm.pad.notnotion.data.firebase.FirebaseFirestoreManager;
 import es.fdi.ucm.pad.notnotion.ui.main.MainActivity;
 import es.fdi.ucm.pad.notnotion.ui.user_register.RegisterActivity;
+import es.fdi.ucm.pad.notnotion.utils.LocaleHelper;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -202,6 +203,8 @@ public class LoginActivity extends AppCompatActivity {
                 })
                 .show();
     }
+
+
 
     private void checkInternetConnection(Runnable onSuccess, Runnable onTimeout) {
         new Thread(() -> {

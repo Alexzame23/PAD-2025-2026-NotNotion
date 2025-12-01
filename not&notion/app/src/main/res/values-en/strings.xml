@@ -16,7 +16,7 @@
     <string name="log_in">Log In</string>
     <string name="user">User</string>
     <string name="name">Username</string>
-    <string name="email">Email</string>
+    <string name="email">Email: %1$s</string>
     <string name="create_account">Create account</string>
     <string name="already_have_an_account">Already have an account?</string>
     <string name="select_language">Select languaje</string>

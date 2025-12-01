@@ -46,6 +46,7 @@ public class NotesMainFragment extends Fragment {
     private FirebaseDataLoader loader;
     private String currentFolderId = "root"; // carpeta actual
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
