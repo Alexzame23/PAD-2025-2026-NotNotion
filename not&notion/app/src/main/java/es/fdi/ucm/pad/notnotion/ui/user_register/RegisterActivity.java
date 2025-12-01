@@ -21,7 +21,6 @@ import es.fdi.ucm.pad.notnotion.R;
 import es.fdi.ucm.pad.notnotion.data.firebase.FirebaseFirestoreManager;
 import es.fdi.ucm.pad.notnotion.ui.main.MainActivity;
 import es.fdi.ucm.pad.notnotion.ui.user_logging.LoginActivity;
-import es.fdi.ucm.pad.notnotion.utils.LocaleHelper;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -116,8 +115,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(LocaleHelper.applyLocale(newBase));
+        super.attachBaseContext(es.fdi.ucm.pad.notnotion.utils.LocaleHelper.applyLocale(newBase));
     }
+
     private void showLanguageDialog() {
         final String[] languages = {"Español", "English"};
         final String[] codes = {"es", "en"};
