@@ -678,7 +678,6 @@ public class TextEditorView extends LinearLayout {
         // Tag para identificar
         docContainer.setTag(uriString);
 
-        // Icono (usar ic_pdf si existe; sino tu icono por defecto)
         ImageView icon = new ImageView(context);
         LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
                 96,
@@ -686,8 +685,7 @@ public class TextEditorView extends LinearLayout {
         );
         iconParams.gravity = Gravity.CENTER_VERTICAL;
         icon.setLayoutParams(iconParams);
-        // intenta usar ic_pdf, si no existe usa icon_note
-        int pdfIconRes = getResIdOrFallback("ic_pdf", "drawable", R.drawable.icon_note);
+        int pdfIconRes = R.drawable.icon_note;
         icon.setImageResource(pdfIconRes);
         docContainer.addView(icon);
 
@@ -733,9 +731,9 @@ public class TextEditorView extends LinearLayout {
                         if (uriTag != null) {
                             boolean removed = insertedPdfs.remove(uriTag);
                             if (removed) {
-                                Log.d(TAG, "✓ PDF eliminado de la lista");
+                                Log.d(TAG, "PDF eliminado de la lista");
                             } else {
-                                Log.w(TAG, "⚠️ PDF no encontrado en la lista");
+                                Log.w(TAG, "PDF no encontrado en la lista");
                             }
                         }
                         removeView(docContainer);
